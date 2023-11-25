@@ -1,0 +1,48 @@
+openapi: 3.0.3
+info:
+  title: ShopAPI
+  description: scrappone
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /trovaprezzi/search:
+    get:
+      tags:
+        - trovaprezzi
+      summary: Find trovaprezzi products
+      description: Find trovaprezzi products
+      operationId: searchProducts
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrovaprezziProduct'
+components:
+  schemas:
+    TrovaprezziProduct:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        image_url:
+          type: string
+        url:
+          type: string
+        price:
+          type: string
+        delivery_price:
+          type: string
+        available:
+          type: boolean
