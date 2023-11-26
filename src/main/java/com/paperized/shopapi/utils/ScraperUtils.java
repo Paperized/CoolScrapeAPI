@@ -1,4 +1,4 @@
-package com.paperized.shopapi.scraper;
+package com.paperized.shopapi.utils;
 
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.tuple.ImmutablePair;

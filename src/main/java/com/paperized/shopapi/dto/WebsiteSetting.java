@@ -9,6 +9,7 @@ import java.util.Map;
 @Getter
 @Setter
 public class WebsiteSetting {
+    private String baseUrl;
     private List<String> availableHeaders;
     private Map<String, String> extraHeaders;
     private Map<String, String> customProperties;
