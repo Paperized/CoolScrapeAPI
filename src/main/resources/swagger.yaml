@@ -6,7 +6,7 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
-  /trovaprezzi/search:
+  /trovaprezzi/search-products:
     get:
       tags:
         - trovaprezzi
@@ -23,7 +23,8 @@ paths:
           description: path of category including extension of the page (like .aspx) if it exists, do not include base path
           required: true
           schema:
-            type: string
+            type: integer
+            minimum: 0
         - in: query
           name: page
           schema:
@@ -64,8 +65,30 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TrovaPrezziProduct'
+  /trovaprezzi/list-categories:
+    get:
+      tags:
+        - trovaprezzi
+      summary: list trovaprezzi categories
+      description: list trovaprezzi categories
+      operationId: listCategories
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrovaPrezziCategory'
 components:
   schemas:
+    TrovaPrezziCategory:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          type: string
+
+
     TrovaPrezziProduct:
       type: object
       properties:

@@ -7,7 +7,9 @@ import com.paperized.shopapi.dto.WebsiteSetting;
 import com.paperized.shopapi.scraper.ScraperHttpService;
 import com.paperized.shopapi.utils.ScraperUtils;
 import com.paperized.shopapi.scraper.TrovaPrezziScraper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -18,6 +20,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -33,16 +36,17 @@ public class TrovaPrezziScraperImpl implements TrovaPrezziScraper {
     }
 
     @Override
-    public List<TrovaPrezziProduct> searchProduct(String search, String category, Integer page, List<String> filters, Integer minPrice, Integer maxPrice, Integer rating, TrovaPrezziSort sort) {
-        String url = format("%s/%s?%s", websiteSetting.getBaseUrl(), category, createQuery(page, filters, minPrice, maxPrice, rating, sort));
+    public List<TrovaPrezziProduct> searchProduct(String search, Integer category, Integer page, List<String> filters, Integer minPrice, Integer maxPrice, Integer rating, TrovaPrezziSort sort) throws HttpStatusException {
+        String queryFilters = createQuery(search, category, page, filters, minPrice, maxPrice, rating, sort);
+        String url = format("%s?%s", websiteSetting.getProp("searchUrl"), queryFilters);
         Document pageDoc = scraperHttpService.getPage(url, websiteSetting);
-        if (pageDoc.location().startsWith(url)) {
-            logger.info("No specific categegory found!");
-            return scrapeGenericPage(pageDoc);
-        } else {
-            logger.info("Found specific category {}", pageDoc.location());
-            return scrapeSpecificCategory(pageDoc);
-        }
+        logger.info("Scraping at url: {}", pageDoc.location());
+        return scrapeSpecificCategory(pageDoc);
+    }
+
+    @Override
+    public Map<String, List<String>> listCategories() {
+        return null;
     }
 
     private List<TrovaPrezziProduct> scrapeSpecificCategory(Document page) {
@@ -70,16 +74,18 @@ public class TrovaPrezziScraperImpl implements TrovaPrezziScraper {
         return products;
     }
 
-    private List<TrovaPrezziProduct> scrapeGenericPage(Document page) {
-        return List.of();
-    }
-
-    private static String createQuery(Integer page, List<String> filters, Integer minPrice, Integer maxPrice, Integer rating, TrovaPrezziSort sort) {
+    private String createQuery(String search, Integer category, Integer page, List<String> filters, Integer minPrice, Integer maxPrice, Integer rating, TrovaPrezziSort sort) {
         StringBuilder builder = new StringBuilder();
+        if(StringUtils.isNotEmpty(search)) {
+            newQueryParam(builder).append("libera=").append(search);
+        }
         if(!CollectionUtils.isEmpty(filters)) {
             for(String filter : filters) {
                 newQueryParam(builder).append("filtro%5B%5D=").append(filter);
             }
+        }
+        if(category != null) {
+            newQueryParam(builder).append("id=").append(category);
         }
         if(page != null) {
             newQueryParam(builder).append("page=").append(page);
@@ -104,7 +110,7 @@ public class TrovaPrezziScraperImpl implements TrovaPrezziScraper {
         return builder.toString();
     }
 
-    private static StringBuilder newQueryParam(StringBuilder builder) {
+    private StringBuilder newQueryParam(StringBuilder builder) {
         if(!builder.isEmpty()) {
             builder.append("&");
         }

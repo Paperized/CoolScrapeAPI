@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class TrovaPrezziController implements TrovaprezziApi {
@@ -18,7 +19,12 @@ public class TrovaPrezziController implements TrovaprezziApi {
     }
 
     @Override
-    public ResponseEntity<List<TrovaPrezziProduct>> searchProducts(String category, String search, Integer page, List<String> filters, Integer minPrice, Integer maxPrice, Integer rating, TrovaPrezziSort sort) {
+    public ResponseEntity<List<TrovaPrezziProduct>> searchProducts(Integer category, String search, Integer page, List<String> filters, Integer minPrice, Integer maxPrice, Integer rating, TrovaPrezziSort sort) throws Exception {
         return ResponseEntity.ok(trovaPrezziService.searchProducts(search, category, page, filters, minPrice, maxPrice, rating, sort));
+    }
+
+    @Override
+    public ResponseEntity<Map<String, List<String>>> listCategories() throws Exception {
+        return TrovaprezziApi.super.listCategories();
     }
 }

@@ -3,6 +3,7 @@ package com.paperized.shopapi.scraper.impl;
 import com.paperized.shopapi.dto.WebsiteSetting;
 import com.paperized.shopapi.exceptions.ScraperFailedConnectionException;
 import com.paperized.shopapi.scraper.ScraperHttpService;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
@@ -29,14 +30,16 @@ public class ScraperHttpServiceImpl implements ScraperHttpService {
     }
 
     @Override
-    public Document getPage(String url, WebsiteSetting websiteSetting) throws ScraperFailedConnectionException {
+    public Document getPage(String url, WebsiteSetting websiteSetting) throws ScraperFailedConnectionException, HttpStatusException {
         try {
             return Jsoup
                     .connect(url)
                     .userAgent(getRandomUserAgent(websiteSetting))
                     .headers(emptyHeadersIfNull(websiteSetting.getExtraHeaders()))
                     .get();
-        } catch (IOException e) {
+        } catch (HttpStatusException e) {
+            throw e;
+        }catch (IOException e) {
             throw new ScraperFailedConnectionException("Error while downloading page", e);
         }
     }

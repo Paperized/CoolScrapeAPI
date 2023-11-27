@@ -102,9 +102,10 @@
 							<supportingFilesToGenerate>
 								ApiUtil.java
 							</supportingFilesToGenerate>
+							<templateDirectory>${project.basedir}/src/main/resources/templates</templateDirectory>
 							<configOptions>
-								<delegatePattern>true</delegatePattern>
 								<useJakartaEe>true</useJakartaEe>
+								<unhandledException>true</unhandledException>
 							</configOptions>
 						</configuration>
 					</execution>
