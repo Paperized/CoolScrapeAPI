@@ -98,10 +98,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AmazonProduct'
+                $ref: '#/components/schemas/AmazonProductTracked'
 components:
   schemas:
-    AmazonProduct:
+    AmazonProductTracked:
+      type: object
+      properties:
+        item:
+          $ref: '#/components/schemas/AmazonProductDto'
+        track:
+          $ref: '#/components/schemas/ProductTrackingDto'
+
+    AmazonProductDto:
       type: object
       properties:
         name:
@@ -147,3 +155,12 @@ components:
     TrovaPrezziSort:
       enum: [ "cheapest", "unpopular" ]
       type: string
+
+    ProductTrackingDto:
+      type: object
+      properties:
+        id:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time

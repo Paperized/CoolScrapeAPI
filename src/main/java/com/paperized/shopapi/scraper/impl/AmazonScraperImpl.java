@@ -1,6 +1,6 @@
 package com.paperized.shopapi.scraper.impl;
 
-import com.paperized.generated.shopapi.model.AmazonProduct;
+import com.paperized.generated.shopapi.model.AmazonProductDto;
 import com.paperized.shopapi.config.ScraperSettings;
 import com.paperized.shopapi.dto.WebsiteSetting;
 import com.paperized.shopapi.scraper.AmazonScraper;
@@ -25,8 +25,8 @@ public class AmazonScraperImpl implements AmazonScraper {
     }
 
     @Override
-    public AmazonProduct findProductDetails(String url) throws HttpStatusException {
-        AmazonProduct amazonProduct = new AmazonProduct();
+    public AmazonProductDto findProductDetails(String url) throws HttpStatusException {
+        AmazonProductDto amazonProduct = new AmazonProductDto();
         Document page = scraperHttpService.getPage(url, websiteSetting);
         logger.info("Loaded amazon page: {}", page.location());
 
@@ -40,7 +40,7 @@ public class AmazonScraperImpl implements AmazonScraper {
         return amazonProduct;
     }
 
-    private boolean extractDetailsRedOfferPanel(Document page, AmazonProduct amazonProduct) {
+    private boolean extractDetailsRedOfferPanel(Document page, AmazonProductDto amazonProduct) {
         var pricePanel = page.selectXpath("//*[starts-with(@id, 'corePrice_desktop')]").first();
         if (pricePanel != null) {
             var lastPrice = ScraperUtils.getText(pricePanel.selectXpath(".//*[@data-a-strike='true']/*[1]").first());
@@ -52,7 +52,7 @@ public class AmazonScraperImpl implements AmazonScraper {
         return StringUtils.isNoneEmpty(amazonProduct.getLastPrice(), amazonProduct.getCurrentPrice(), amazonProduct.getSavingPrice());
     }
 
-    private void extractDetailsOfferPanel(Document page, AmazonProduct amazonProduct) {
+    private void extractDetailsOfferPanel(Document page, AmazonProductDto amazonProduct) {
         var pricePanel = page.selectXpath("//*[starts-with(@id, 'corePriceDisplay')]").first();
         if (pricePanel != null) {
             var currentPrice = ScraperUtils.getText(pricePanel.selectXpath(".//*[@id='taxInclusiveMessage']/../span[contains(@class, 'priceToPay')]").first());

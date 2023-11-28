@@ -1,8 +1,8 @@
 package com.paperized.shopapi.scraper;
 
-import com.paperized.generated.shopapi.model.AmazonProduct;
+import com.paperized.generated.shopapi.model.AmazonProductDto;
 import org.jsoup.HttpStatusException;
 
 public interface AmazonScraper {
-    AmazonProduct findProductDetails(String url) throws HttpStatusException;
+    AmazonProductDto findProductDetails(String url) throws HttpStatusException;
 }
