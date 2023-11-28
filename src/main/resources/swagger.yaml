@@ -108,10 +108,16 @@ components:
           type: string
         lastPrice:
           type: string
+          description: for offer type products
         currentPrice:
           type: string
+          description: share
         savingPrice:
           type: string
+          description: for offer type products
+        suggestedPrice:
+          type: string
+          description: suggested price of product
 
     TrovaPrezziCategory:
       type: object
