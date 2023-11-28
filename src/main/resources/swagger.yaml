@@ -79,15 +79,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TrovaPrezziCategory'
+  /amazon/find-product-details:
+    get:
+      tags:
+        - amazon
+      summary: Find amazon product details
+      description: Find amazon product details
+      operationId: findProductDetails
+      parameters:
+        - in: query
+          name: url
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AmazonProduct'
 components:
   schemas:
+    AmazonProduct:
+      type: object
+      properties:
+        name:
+          type: string
+        lastPrice:
+          type: string
+        currentPrice:
+          type: string
+        savingPrice:
+          type: string
+
     TrovaPrezziCategory:
       type: object
       additionalProperties:
         type: array
         items:
           type: string
-
 
     TrovaPrezziProduct:
       type: object
@@ -108,5 +139,5 @@ components:
           type: boolean
 
     TrovaPrezziSort:
-      enum: ["cheapest", "unpopular"]
+      enum: [ "cheapest", "unpopular" ]
       type: string

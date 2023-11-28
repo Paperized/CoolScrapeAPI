@@ -20,7 +20,8 @@ public class WebsiteSetting {
 
     @Getter
     public enum WebsiteName {
-        TrovaPrezzi("trovaPrezzi");
+        TrovaPrezzi("trovaPrezzi"),
+        Amazon("amazon");
 
         private final String nameInConfig;
 
