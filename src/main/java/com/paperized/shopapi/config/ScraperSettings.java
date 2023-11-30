@@ -1,6 +1,7 @@
 package com.paperized.shopapi.config;
 
 import com.paperized.shopapi.dto.WebsiteSetting;
+import com.paperized.shopapi.model.WebsiteName;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,9 +15,9 @@ import java.util.Map;
 @Getter
 @Setter
 public class ScraperSettings {
-    private Map<WebsiteSetting.WebsiteName, WebsiteSetting> websitesSettings;
+    private Map<WebsiteName, WebsiteSetting> websitesSettings;
 
-    public WebsiteSetting fromName(@NotNull WebsiteSetting.WebsiteName websiteName) {
+    public WebsiteSetting fromName(@NotNull WebsiteName websiteName) {
         return websitesSettings.get(websiteName);
     }
 }

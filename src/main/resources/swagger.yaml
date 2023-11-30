@@ -99,6 +99,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AmazonProductTracked'
+  /tracking/{trackingId}:
+    get:
+      tags:
+        - tracking
+      summary: Find infomations by tracking id
+      description: Find infomations by tracking id
+      operationId: findInformationsById
+      parameters:
+        - in: path
+          name: trackingId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
 components:
   schemas:
     AmazonProductTracked:

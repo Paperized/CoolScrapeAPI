@@ -4,6 +4,7 @@ import com.paperized.generated.shopapi.model.TrovaPrezziProduct;
 import com.paperized.generated.shopapi.model.TrovaPrezziSort;
 import com.paperized.shopapi.config.ScraperSettings;
 import com.paperized.shopapi.dto.WebsiteSetting;
+import com.paperized.shopapi.model.WebsiteName;
 import com.paperized.shopapi.scraper.ScraperHttpService;
 import com.paperized.shopapi.utils.ScraperUtils;
 import com.paperized.shopapi.scraper.TrovaPrezziScraper;
@@ -32,7 +33,7 @@ public class TrovaPrezziScraperImpl implements TrovaPrezziScraper {
 
     public TrovaPrezziScraperImpl(ScraperHttpService scraperHttpService, ScraperSettings scraperSettings) {
         this.scraperHttpService = scraperHttpService;
-        websiteSetting = scraperSettings.fromName(WebsiteSetting.WebsiteName.TrovaPrezzi);
+        websiteSetting = scraperSettings.fromName(WebsiteName.TrovaPrezzi);
     }
 
     @Override

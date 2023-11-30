@@ -4,6 +4,7 @@ import com.paperized.generated.shopapi.model.AmazonProductDto;
 import com.paperized.generated.shopapi.model.AmazonProductTracked;
 import com.paperized.generated.shopapi.model.ProductTrackingDto;
 import com.paperized.shopapi.model.TrackingAction;
+import com.paperized.shopapi.model.WebsiteName;
 import com.paperized.shopapi.scraper.AmazonScraper;
 import com.paperized.shopapi.service.AmazonService;
 import com.paperized.shopapi.service.TrackingService;
@@ -23,7 +24,7 @@ public class AmazonServiceImpl implements AmazonService {
     @Override
     public AmazonProductTracked findProductDetails(String url) throws HttpStatusException {
         AmazonProductDto amazonProduct = amazonScraper.findProductDetails(url);
-        ProductTrackingDto tracking = trackingService.generateNewTracking(url, TrackingAction.AMAZON_PRODUCT_DETAILS);
+        ProductTrackingDto tracking = trackingService.generateNewTracking(url, WebsiteName.Amazon, TrackingAction.AMAZON_PRODUCT_DETAILS);
 
         return new AmazonProductTracked()
                 .item(amazonProduct)

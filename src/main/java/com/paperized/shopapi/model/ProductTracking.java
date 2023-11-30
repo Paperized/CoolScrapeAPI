@@ -16,6 +16,9 @@ public class ProductTracking {
     @Column(name = "id")
     private String id;
 
+    @Column(name = "website_name", nullable = false)
+    private WebsiteName websiteName;
+
     @Column(name = "action", nullable = false)
     private TrackingAction action;
 

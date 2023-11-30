@@ -17,16 +17,4 @@ public class WebsiteSetting {
     public String getProp(String prop) {
         return customProperties.get(prop);
     }
-
-    @Getter
-    public enum WebsiteName {
-        TrovaPrezzi("trovaPrezzi"),
-        Amazon("amazon");
-
-        private final String nameInConfig;
-
-        WebsiteName(String nameInConfig) {
-            this.nameInConfig = nameInConfig;
-        }
-    }
 }

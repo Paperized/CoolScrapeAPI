@@ -1,6 +1,8 @@
 package com.paperized.shopapi.controller.advice;
 
 import com.paperized.shopapi.exceptions.ScraperFailedConnectionException;
+import com.paperized.shopapi.exceptions.TrackingExpiredException;
+import jakarta.persistence.EntityNotFoundException;
 import org.jsoup.HttpStatusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,36 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionController {
     Logger logger = LoggerFactory.getLogger(GlobalExceptionController.class);
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException ex) {
+        logger.info("ControllerAdvice: {}", ex.getMessage());
+        ex.printStackTrace();
+
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setHttpStatus(httpStatus.value());
+        errorResponse.setErrorCode("E_004");
+        errorResponse.setErrorDescription("This resource does not exists!");
+
+        return new ResponseEntity<>(errorResponse, httpStatus);
+    }
+
+    @ExceptionHandler(TrackingExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleTrackingExpiredException(TrackingExpiredException ex) {
+        logger.info("ControllerAdvice: {}", ex.getMessage());
+        ex.printStackTrace();
+
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setHttpStatus(httpStatus.value());
+        errorResponse.setErrorCode("E_003");
+        errorResponse.setErrorDescription("This tracing already expired!");
+
+        return new ResponseEntity<>(errorResponse, httpStatus);
+    }
 
     @ExceptionHandler(HttpStatusException.class)
     public ResponseEntity<ErrorResponse> handleScraperHttpStatusException(HttpStatusException ex) {
