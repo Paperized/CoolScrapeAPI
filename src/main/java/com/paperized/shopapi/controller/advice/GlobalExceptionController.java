@@ -2,6 +2,7 @@ package com.paperized.shopapi.controller.advice;
 
 import com.paperized.shopapi.exceptions.ScraperFailedConnectionException;
 import com.paperized.shopapi.exceptions.TrackingExpiredException;
+import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;
 import jakarta.persistence.EntityNotFoundException;
 import org.jsoup.HttpStatusException;
 import org.slf4j.Logger;
@@ -15,77 +16,48 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionController {
     Logger logger = LoggerFactory.getLogger(GlobalExceptionController.class);
 
+    @ExceptionHandler(UnsuccessfulScrapeException.class)
+    public ResponseEntity<ErrorResponse> handleUnsuccessfulScrapeException(UnsuccessfulScrapeException ex) {
+        return getErrorResponseResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "E_005", "The page loaded but we were unable to scrape data", ex);
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException ex) {
-        logger.info("ControllerAdvice: {}", ex.getMessage());
-        ex.printStackTrace();
-
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setHttpStatus(httpStatus.value());
-        errorResponse.setErrorCode("E_004");
-        errorResponse.setErrorDescription("This resource does not exists!");
-
-        return new ResponseEntity<>(errorResponse, httpStatus);
+        return getErrorResponseResponseEntity(HttpStatus.NOT_FOUND, "E_004", "This resource does not exists!", ex);
     }
 
     @ExceptionHandler(TrackingExpiredException.class)
     public ResponseEntity<ErrorResponse> handleTrackingExpiredException(TrackingExpiredException ex) {
-        logger.info("ControllerAdvice: {}", ex.getMessage());
-        ex.printStackTrace();
-
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setHttpStatus(httpStatus.value());
-        errorResponse.setErrorCode("E_003");
-        errorResponse.setErrorDescription("This tracing already expired!");
-
-        return new ResponseEntity<>(errorResponse, httpStatus);
+        return getErrorResponseResponseEntity(HttpStatus.BAD_REQUEST, "E_003", "This tracing already expired!", ex);
     }
 
     @ExceptionHandler(HttpStatusException.class)
     public ResponseEntity<ErrorResponse> handleScraperHttpStatusException(HttpStatusException ex) {
-        logger.info("ControllerAdvice: {}", ex.getMessage());
-        ex.printStackTrace();
-
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setHttpStatus(httpStatus.value());
-        errorResponse.setErrorCode("E_002");
-        errorResponse.setErrorDescription("Website failed to load with the provided filters, error: " + ex.getStatusCode());
-
-        return new ResponseEntity<>(errorResponse, httpStatus);
+        return getErrorResponseResponseEntity(HttpStatus.BAD_REQUEST, "E_002",
+                "Website failed to load with the provided filters, error: " + ex.getStatusCode(), ex);
     }
 
     @ExceptionHandler(ScraperFailedConnectionException.class)
     public ResponseEntity<ErrorResponse> handleScraperFailedConnectionException(ScraperFailedConnectionException ex) {
-        logger.info("ControllerAdvice: {}", ex.getMessage());
-        ex.printStackTrace();
-
-        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setHttpStatus(httpStatus.value());
-        errorResponse.setErrorCode("E_001");
-        errorResponse.setErrorDescription("Failed to connect to the target website!");
-
-        return new ResponseEntity<>(errorResponse, httpStatus);
+        return getErrorResponseResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "E_001", "Failed to connect to the target website!", ex);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
-        logger.info("ControllerAdvice: {}", ex.getMessage());
-        ex.printStackTrace();
+        return getErrorResponseResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "E_000", "Unexpected error: " + ex.getMessage(), ex);
+    }
 
-        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+    private ResponseEntity<ErrorResponse> getErrorResponseResponseEntity(HttpStatus httpStatus, String errorCode, String errorDescription, Exception ex) {
+        logger.info("ControllerAdvice: {}", ex.getMessage());
+
+        //useful for debug right now
+        //noinspection CallToPrintStackTrace
+        ex.printStackTrace();
 
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setHttpStatus(httpStatus.value());
-        errorResponse.setErrorCode("E_000");
-        errorResponse.setErrorDescription("Unexpected error: " + ex.getMessage());
+        errorResponse.setErrorCode(errorCode);
+        errorResponse.setErrorDescription(errorDescription);
 
         return new ResponseEntity<>(errorResponse, httpStatus);
     }

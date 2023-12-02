@@ -3,6 +3,7 @@ package com.paperized.shopapi.service.impl;
 import com.paperized.generated.shopapi.model.AmazonProductDto;
 import com.paperized.generated.shopapi.model.AmazonProductTracked;
 import com.paperized.generated.shopapi.model.ProductTrackingDto;
+import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;
 import com.paperized.shopapi.model.TrackingAction;
 import com.paperized.shopapi.model.WebsiteName;
 import com.paperized.shopapi.scraper.AmazonScraper;
@@ -22,7 +23,7 @@ public class AmazonServiceImpl implements AmazonService {
     }
 
     @Override
-    public AmazonProductTracked findProductDetails(String url) throws HttpStatusException {
+    public AmazonProductTracked findProductDetails(String url) throws HttpStatusException, UnsuccessfulScrapeException {
         AmazonProductDto amazonProduct = amazonScraper.findProductDetails(url);
         ProductTrackingDto tracking = trackingService.generateNewTracking(url, WebsiteName.Amazon, TrackingAction.AMAZON_PRODUCT_DETAILS);
 
