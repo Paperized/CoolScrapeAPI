@@ -18,11 +18,6 @@ public class TrackingController implements TrackingApi {
     }
 
     @Override
-    public ResponseEntity<Object> findInformationsById(String trackingId) throws Exception {
-        return ResponseEntity.ok(scrapingActionService.replicateByTrackingId(trackingId));
-    }
-
-    @Override
     public ResponseEntity<Void> registerTrackingWebhook(String trackingId, RegisterWebhookRequest registerWebhookRequest) throws Exception {
         scrapingActionService.scheduleTrackingListening(trackingId, registerWebhookRequest.getUrl(), defaultScheduleIntervalMs);
         return ResponseEntity.ok().build();
