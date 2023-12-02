@@ -1,30 +1,31 @@
 package com.paperized.shopapi.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "PRODUCT_TRACKING")
 @Data
 public class ProductTracking {
     @Id
-    @Column(name = "id")
+    @Column(name = "ID")
     private String id;
 
-    @Column(name = "website_name", nullable = false)
+    @Column(name = "WEBSITE_NAME", nullable = false)
     private WebsiteName websiteName;
 
-    @Column(name = "action", nullable = false)
+    @Column(name = "ACTION", nullable = false)
     private TrackingAction action;
 
-    @Column(name = "url", nullable = false)
+    @Column(name = "URL", nullable = false)
     private String url;
 
-    @Column(name = "expires_at", nullable = false)
-    private OffsetDateTime expiresAt;
+    @Column(name = "REGISTER_EXPIRES_AT", nullable = false)
+    private LocalDateTime webhookRegisterExpiresAt;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "ID", referencedColumnName = "id")
+    private RegisteredProductTracking registeredProductTracking;
 }

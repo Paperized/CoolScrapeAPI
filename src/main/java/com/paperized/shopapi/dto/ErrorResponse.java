@@ -1,4 +1,4 @@
-package com.paperized.shopapi.controller.advice;
+package com.paperized.shopapi.dto;
 
 import lombok.Data;
 

@@ -89,7 +89,7 @@ public abstract class ScrapeExecutor {
                             if (s.getRetryCount() > 0) {
                                 Logger logger = getLogger();
                                 if(logger != null) {
-                                    logger.info("Scrape took {} tries!", s.getRetryCount());
+                                    logger.info("Scrape took {} more tries!", s.getRetryCount());
                                 }
                             }
                             return res;

@@ -1,5 +1,6 @@
 package com.paperized.shopapi.controller.advice;
 
+import com.paperized.shopapi.dto.ErrorResponse;
 import com.paperized.shopapi.exceptions.ScraperFailedConnectionException;
 import com.paperized.shopapi.exceptions.TrackingExpiredException;
 import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;

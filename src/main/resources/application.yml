@@ -1,12 +1,5 @@
 scraper-settings:
     websitesSettings:
-        trovaPrezzi:
-            baseUrl: https://www.trovaprezzi.it
-            availableHeaders:
-                - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
-            extraHeaders: []
-            customProperties:
-                searchUrl: https://www.trovaprezzi.it/categoria.aspx
         amazon:
             baseUrl: https://www.amazon.it
             availableHeaders:
@@ -15,7 +8,9 @@ scraper-settings:
             customProperties:
                 searchUrl: https://www.amazon.it/
 
-
+tracking:
+    defaultRegistrationExpireTime: 1 # minutes
+    defaultScheduleInterval: 5000 # milliseconds
 
 logging:
     level:

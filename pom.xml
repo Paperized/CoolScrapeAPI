@@ -123,7 +123,12 @@
 							<configOptions>
 								<useJakartaEe>true</useJakartaEe>
 								<unhandledException>true</unhandledException>
+								<dateLibrary>custom</dateLibrary>
 							</configOptions>
+							<typeMappings>
+								<typeMapping>DateTime=java.time.LocalDateTime</typeMapping>
+								<typeMapping>Date=java.time.LocalDateTime</typeMapping>
+							</typeMappings>
 						</configuration>
 					</execution>
 				</executions>

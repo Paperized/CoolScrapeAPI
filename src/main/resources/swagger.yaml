@@ -6,79 +6,6 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
-  /trovaprezzi/search-products:
-    get:
-      tags:
-        - trovaprezzi
-      summary: Find trovaprezzi products
-      description: Find trovaprezzi products
-      operationId: searchProducts
-      parameters:
-        - in: query
-          name: search
-          schema:
-            type: string
-        - in: query
-          name: category
-          description: path of category including extension of the page (like .aspx) if it exists, do not include base path
-          required: true
-          schema:
-            type: integer
-            minimum: 0
-        - in: query
-          name: page
-          schema:
-            type: integer
-            minimum: 1
-        - in: query
-          name: filters
-          description: each category can have their own filters, check on the page itself and add the one needed
-          schema:
-            type: array
-            items:
-              type: string
-        - in: query
-          name: minPrice
-          schema:
-            type: integer
-            minimum: 1
-        - in: query
-          name: maxPrice
-          schema:
-            type: integer
-        - in: query
-          name: rating
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 5
-        - in: query
-          name: sort
-          schema:
-            $ref: '#/components/schemas/TrovaPrezziSort'
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TrovaPrezziProduct'
-  /trovaprezzi/list-categories:
-    get:
-      tags:
-        - trovaprezzi
-      summary: list trovaprezzi categories
-      description: list trovaprezzi categories
-      operationId: listCategories
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrovaPrezziCategory'
   /amazon/find-product-details:
     get:
       tags:
@@ -119,6 +46,44 @@ paths:
             application/json:
               schema:
                 type: object
+  /tracking/{trackingId}/register-webhook:
+    post:
+      tags:
+        - tracking
+      summary: Register a webhook for this tracking id
+      description: Register a webhook for this tracking id
+      operationId: registerTrackingWebhook
+      parameters:
+        - in: path
+          name: trackingId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterWebhookRequest'
+      responses:
+        '200':
+          description: OK
+  /tracking/{trackingId}/deregister-webhook:
+    delete:
+      tags:
+        - tracking
+      summary: Remove webhook for this tracking id
+      description: Remove webhook for this tracking id
+      operationId: unregisterTrackingWebhook
+      parameters:
+        - in: path
+          name: trackingId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
 components:
   schemas:
     AmazonProductTracked:
@@ -172,6 +137,14 @@ components:
         available:
           type: boolean
 
+    RegisterWebhookRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+
     TrovaPrezziSort:
       enum: [ "cheapest", "unpopular" ]
       type: string
@@ -181,6 +154,6 @@ components:
       properties:
         id:
           type: string
-        expiresAt:
+        webhookRegisterExpiresAt:
           type: string
           format: date-time
