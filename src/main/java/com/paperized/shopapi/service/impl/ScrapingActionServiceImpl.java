@@ -12,6 +12,7 @@ import com.paperized.shopapi.repository.RegisteredProductTrackingRepository;
 import com.paperized.shopapi.scraper.ScrapeExecutor;
 import com.paperized.shopapi.service.ScrapingActionService;
 import io.micrometer.common.util.StringUtils;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.jsoup.HttpStatusException;
@@ -53,6 +54,22 @@ public class ScrapingActionServiceImpl implements ScrapingActionService {
                 throw new RuntimeException("Internal error, more then one ScrapeExecutor have the same websiteName: " + x.getWebsiteName());
             }
         });
+    }
+
+    @PostConstruct
+    public void rescheduleProductTrackings() {
+        List<RegisteredProductTracking> trackingList = registeredProductTrackingRepository.findAll();
+        for(RegisteredProductTracking tracking : trackingList) {
+            Runnable runnable = getProductTrackingRunnable(tracking.getId());
+
+            // Restart each schedule after 1 minute after the startup
+            ScheduledFuture<?> scheduledFuture = taskScheduler.scheduleWithFixedDelay(runnable,
+                    Instant.now().plusSeconds(60),
+                    Duration.ofMillis(tracking.getIntervalDuration()));
+
+            currentScheduledProductTracking.put(tracking.getId(), scheduledFuture);
+            logger.info("Rescheduled tracking webhook successfully with id : {}!", tracking.getId());
+        }
     }
 
     @Override
