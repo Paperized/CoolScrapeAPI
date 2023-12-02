@@ -1,5 +1,6 @@
 package com.paperized.shopapi.service.impl;
 
+import com.paperized.shopapi.dto.WebhookScrapeInput;
 import com.paperized.shopapi.exceptions.TrackingAlreadyScheduledException;
 import com.paperized.shopapi.exceptions.TrackingExpiredException;
 import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;
@@ -21,7 +22,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -163,13 +167,23 @@ public class ScrapingActionServiceImpl implements ScrapingActionService {
             try {
                 scrapedResult = replicateScrapeAction(tracking.getUrl(), tracking.getWebsiteName(), tracking.getAction());
                 logger.info("Successfully scraped product with tracking id: {}", trackingId);
-                // send to webhook
+
+                makeWebhookRequest(trackingId, registeredTracking.getWebhookUrl(), scrapedResult);
             } catch (HttpStatusException | UnsuccessfulScrapeException e) {
                 logger.error(e.getMessage());
-                return;
             }
-
-            logger.info(scrapedResult.toString());
         };
+    }
+
+    private void makeWebhookRequest(String trackingId, String webhook, Object body) {
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            restTemplate.postForLocation(URI.create(webhook), WebhookScrapeInput.builder().result(body).trackingId(trackingId).build());
+            logger.info("Successfully scraped product with tracking id: {} and sent via webhook", trackingId);
+        } catch (RestClientException ex) {
+            // implement max retries before deleting the schedule
+            logger.info("Failed to send scraped result via webhook (trackingId: {}, webhookUrl: {}, message: {})",
+                    trackingId, webhook, ex.getMessage());
+        }
     }
 }
