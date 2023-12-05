@@ -128,6 +128,7 @@
 							<typeMappings>
 								<typeMapping>DateTime=java.time.LocalDateTime</typeMapping>
 								<typeMapping>Date=java.time.LocalDateTime</typeMapping>
+								<typeMapping>dquery=com.paperized.shopapi.dquery.QueryCondition</typeMapping>
 							</typeMappings>
 						</configuration>
 					</execution>

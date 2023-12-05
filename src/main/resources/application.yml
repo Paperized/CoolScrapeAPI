@@ -10,7 +10,7 @@ scraper-settings:
 
 tracking:
     defaultRegistrationExpireTime: 1 # minutes
-    defaultScheduleInterval: 5000 # milliseconds
+    defaultScheduleInterval: 50000000 # milliseconds
 
 logging:
     level:
