@@ -81,6 +81,7 @@ components:
 
     AmazonProductDto:
       type: object
+      x-dqueriable: true
       properties:
         name:
           type: string
@@ -97,31 +98,6 @@ components:
           type: string
           description: suggested price of product
 
-    TrovaPrezziCategory:
-      type: object
-      additionalProperties:
-        type: array
-        items:
-          type: string
-
-    TrovaPrezziProduct:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        image_url:
-          type: string
-        url:
-          type: string
-        price:
-          type: string
-        delivery_price:
-          type: string
-        available:
-          type: boolean
-
     RegisterWebhookRequest:
       type: object
       required:
@@ -129,10 +105,6 @@ components:
       properties:
         url:
           type: string
-
-    TrovaPrezziSort:
-      enum: [ "cheapest", "unpopular" ]
-      type: string
 
     ProductTrackingDto:
       type: object
