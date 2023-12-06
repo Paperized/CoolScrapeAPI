@@ -11,12 +11,15 @@ import com.paperized.shopapi.scraper.ScrapeExecutor;
 import com.paperized.shopapi.scraper.ScraperHttpService;
 import com.paperized.shopapi.scraper.annotations.ScrapeAction;
 import com.paperized.shopapi.utils.ScraperUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 
 @Service
 public class AmazonScraperImpl extends ScrapeExecutor implements AmazonScraper {
@@ -60,23 +63,27 @@ public class AmazonScraperImpl extends ScrapeExecutor implements AmazonScraper {
             var lastPrice = ScraperUtils.getText(pricePanel.selectXpath(".//*[@data-a-strike='true']/*[1]").first());
             var currentPrice = ScraperUtils.getText(pricePanel.selectXpath(".//*[@id='taxInclusiveMessage']/../*[@data-a-color='price']/*[1]").first());
             var savingPrice = ScraperUtils.getText(pricePanel.selectXpath("//*[contains(@id, 'bundleLTBSSavings')]/..//*[@data-a-color='price']/*[1]").first());
-            amazonProduct.lastPrice(lastPrice).currentPrice(currentPrice).savingPrice(savingPrice);
+            amazonProduct
+                    .lastPrice(tryConvertPriceToBigDecimal(lastPrice))
+                    .currentPrice(tryConvertPriceToBigDecimal(currentPrice))
+                    .savingPrice(tryConvertPriceToBigDecimal(savingPrice));
         }
 
-        return StringUtils.isNoneBlank(amazonProduct.getLastPrice(), amazonProduct.getCurrentPrice(), amazonProduct.getSavingPrice());
+        return ObjectUtils.allNotNull(amazonProduct.getLastPrice(), amazonProduct.getCurrentPrice(), amazonProduct.getSavingPrice());
     }
 
     private boolean extractDetailsOfferPanel(Document page, AmazonProductDto amazonProduct) {
         var pricePanel = page.selectXpath("//*[starts-with(@id, 'corePriceDisplay')]").first();
-        String currentPrice = null;
         if (pricePanel != null) {
-            currentPrice = ScraperUtils.getText(pricePanel.selectXpath(".//*[@id='taxInclusiveMessage']/../span[contains(@class, 'priceToPay')]").first());
+            String currentPrice = ScraperUtils.getText(pricePanel.selectXpath(".//*[@id='taxInclusiveMessage']/../span[contains(@class, 'priceToPay')]/*[@aria-hidden='true']").first());
             var suggestedPrice = ScraperUtils.getText(pricePanel.selectXpath(".//span[contains(@class, 'basisPrice')]//span[@data-a-strike]/*[1]").first());
-            amazonProduct.currentPrice(currentPrice).suggestedPrice(suggestedPrice);
+            amazonProduct
+                    .currentPrice(tryConvertPriceToBigDecimal(currentPrice))
+                    .suggestedPrice(tryConvertPriceToBigDecimal(suggestedPrice));
         }
 
         // at least current price is needed to be a successful scrape
-        return StringUtils.isNotBlank(currentPrice);
+        return amazonProduct.getCurrentPrice() != null;
     }
 
     @Override
@@ -87,5 +94,18 @@ public class AmazonScraperImpl extends ScrapeExecutor implements AmazonScraper {
     @Override
     protected Logger getLogger() {
         return logger;
+    }
+
+    private BigDecimal tryConvertPriceToBigDecimal(String price) {
+        if(StringUtils.isBlank(price)) {
+            return null;
+        }
+
+        try {
+            return new BigDecimal(price.replace(',', '.').substring(0, price.length() - 1));
+        } catch (NumberFormatException ex) {
+            logger.warn(ex.toString());
+            return null;
+        }
     }
 }

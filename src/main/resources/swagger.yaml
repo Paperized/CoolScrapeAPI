@@ -86,16 +86,16 @@ components:
         name:
           type: string
         lastPrice:
-          type: string
+          type: number
           description: for offer type products
         currentPrice:
-          type: string
+          type: number
           description: share
         savingPrice:
-          type: string
+          type: number
           description: for offer type products
         suggestedPrice:
-          type: string
+          type: number
           description: suggested price of product
 
     RegisterWebhookRequest:
