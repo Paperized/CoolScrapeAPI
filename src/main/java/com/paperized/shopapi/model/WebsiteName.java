@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum WebsiteName {
-    Amazon("amazon");
+    Amazon("amazon"),
+    TcgStore("tcg-store");
 
     private final String nameInConfig;
 

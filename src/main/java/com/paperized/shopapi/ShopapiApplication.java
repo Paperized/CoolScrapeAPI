@@ -1,9 +1,9 @@
 package com.paperized.shopapi;
 
 import com.paperized.generated.shopapi.model.AmazonProductDto;
-import com.paperized.shopapi.dquery.DComparable;
-import com.paperized.shopapi.dquery.DSort;
-import com.paperized.shopapi.dquery.SortPair;
+import com.paperized.shopapi.dquery.sort.DComparable;
+import com.paperized.shopapi.dquery.sort.DSort;
+import com.paperized.shopapi.dquery.sort.SortPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -12,7 +12,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -32,12 +31,12 @@ public class ShopapiApplication implements CommandLineRunner {
         List<AmazonProductDto> dtos = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             AmazonProductDto temp = new AmazonProductDto();
-            temp.setCurrentPrice(BigDecimal.valueOf(new Random().nextDouble() * 100));
-            temp.setSuggestedPrice(BigDecimal.valueOf(new Random().nextDouble() * 1000));
+            temp.setCurrentPrice(new Random().nextDouble() * 100);
+            temp.setSuggestedPrice(new Random().nextDouble() * 1000);
             dtos.add(temp);
         }
 
-        logger.info("Prima: {}", dtos);
+        //logger.info("Prima: {}", dtos);
 
         // I want cheaper prices that should be higher in price, not a real metric but for the tests sake
         DSort sort = new DSort()
@@ -46,6 +45,6 @@ public class ShopapiApplication implements CommandLineRunner {
 
         dtos.sort(new DComparable(sort));
 
-        logger.info("Dopo: {}", dtos);
+        //logger.info("Dopo: {}", dtos);
     }
 }

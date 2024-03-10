@@ -64,9 +64,9 @@ public class AmazonScraperImpl extends ScrapeExecutor implements AmazonScraper {
             var currentPrice = ScraperUtils.getText(pricePanel.selectXpath(".//*[@id='taxInclusiveMessage']/../*[@data-a-color='price']/*[1]").first());
             var savingPrice = ScraperUtils.getText(pricePanel.selectXpath("//*[contains(@id, 'bundleLTBSSavings')]/..//*[@data-a-color='price']/*[1]").first());
             amazonProduct
-                    .lastPrice(tryConvertPriceToBigDecimal(lastPrice))
-                    .currentPrice(tryConvertPriceToBigDecimal(currentPrice))
-                    .savingPrice(tryConvertPriceToBigDecimal(savingPrice));
+                    .lastPrice(tryConvertPriceToDouble(lastPrice))
+                    .currentPrice(tryConvertPriceToDouble(currentPrice))
+                    .savingPrice(tryConvertPriceToDouble(savingPrice));
         }
 
         return ObjectUtils.allNotNull(amazonProduct.getLastPrice(), amazonProduct.getCurrentPrice(), amazonProduct.getSavingPrice());
@@ -78,8 +78,8 @@ public class AmazonScraperImpl extends ScrapeExecutor implements AmazonScraper {
             String currentPrice = ScraperUtils.getText(pricePanel.selectXpath(".//*[@id='taxInclusiveMessage']/../span[contains(@class, 'priceToPay')]/*[@aria-hidden='true']").first());
             var suggestedPrice = ScraperUtils.getText(pricePanel.selectXpath(".//span[contains(@class, 'basisPrice')]//span[@data-a-strike]/*[1]").first());
             amazonProduct
-                    .currentPrice(tryConvertPriceToBigDecimal(currentPrice))
-                    .suggestedPrice(tryConvertPriceToBigDecimal(suggestedPrice));
+                    .currentPrice(tryConvertPriceToDouble(currentPrice))
+                    .suggestedPrice(tryConvertPriceToDouble(suggestedPrice));
         }
 
         // at least current price is needed to be a successful scrape
@@ -96,13 +96,13 @@ public class AmazonScraperImpl extends ScrapeExecutor implements AmazonScraper {
         return logger;
     }
 
-    private BigDecimal tryConvertPriceToBigDecimal(String price) {
+    private Double tryConvertPriceToDouble(String price) {
         if(StringUtils.isBlank(price)) {
             return null;
         }
 
         try {
-            return new BigDecimal(price.replace(',', '.').substring(0, price.length() - 1));
+            return Double.parseDouble(price.replace(',', '.').substring(0, price.length() - 1));
         } catch (NumberFormatException ex) {
             logger.warn(ex.toString());
             return null;

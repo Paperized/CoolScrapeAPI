@@ -7,6 +7,13 @@ scraper-settings:
             extraHeaders: [ ]
             customProperties:
                 searchUrl: https://www.amazon.it/
+        tcgstore:
+            base-url: https://tcg-store.it/
+            availableHeaders:
+              - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
+            extraHeaders: [ ]
+            customProperties:
+                find-summary-products: https://tcg-store.it/home/giochi-di-carte/
 
 tracking:
     defaultRegistrationExpireTime: 1 # minutes

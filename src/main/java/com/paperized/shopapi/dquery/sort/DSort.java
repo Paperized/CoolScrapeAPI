@@ -1,4 +1,4 @@
-package com.paperized.shopapi.dquery;
+package com.paperized.shopapi.dquery.sort;
 
 import org.apache.commons.lang3.StringUtils;
 

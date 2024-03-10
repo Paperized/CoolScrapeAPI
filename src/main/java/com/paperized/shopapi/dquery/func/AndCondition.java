@@ -1,8 +1,11 @@
-package com.paperized.shopapi.dquery;
+package com.paperized.shopapi.dquery.func;
+
+import com.paperized.shopapi.dquery.DQueriable;
+import com.paperized.shopapi.dquery.DQueryNode;
 
 import java.util.ArrayList;
 
-public class AndCondition extends ArrayList<QueryCondition> implements DQueryCondition {
+public class AndCondition extends ArrayList<DQueryNode> implements DQueryCondition {
     @Override
     public boolean evaluate(DQueriable qEntity) {
         for(DQueryCondition branch : this) {

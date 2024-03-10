@@ -6,6 +6,29 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
+  /tcg-store/find-summary-products:
+    post:
+      tags:
+        - tcg-store
+      operationId: findSummaryProducts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pageNum:
+                  type: integer
+                query:
+                  type: dquery
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TcgProductsTracked'
+
   /amazon/find-product-details:
     post:
       tags:
@@ -19,11 +42,6 @@ paths:
           required: true
           schema:
             type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: dquery
       responses:
         '200':
           description: Successful operation
@@ -71,6 +89,15 @@ paths:
           description: OK
 components:
   schemas:
+    TcgProductsTracked:
+      type: object
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/TcgProductDto'
+        track:
+          $ref: '#/components/schemas/ProductTrackingDto'
+
     AmazonProductTracked:
       type: object
       properties:
@@ -78,6 +105,27 @@ components:
           $ref: '#/components/schemas/AmazonProductDto'
         track:
           $ref: '#/components/schemas/ProductTrackingDto'
+
+    TcgProductDto:
+      type: object
+      x-dqueriable: true
+      properties:
+        name:
+          type: string
+        img:
+          type: string
+        url:
+          type: string
+        oldPrice:
+          type: number
+          format: double
+        newPrice:
+          type: number
+          format: double
+        category:
+          type: string
+        soldOut:
+          type: boolean
 
     AmazonProductDto:
       type: object
@@ -87,15 +135,19 @@ components:
           type: string
         lastPrice:
           type: number
+          format: double
           description: for offer type products
         currentPrice:
           type: number
+          format: double
           description: share
         savingPrice:
           type: number
+          format: double
           description: for offer type products
         suggestedPrice:
           type: number
+          format: double
           description: suggested price of product
 
     RegisterWebhookRequest:

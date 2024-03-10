@@ -47,7 +47,8 @@ public class ScrapingActionServiceImpl implements ScrapingActionService {
     private final TaskScheduler taskScheduler;
     private final Long defaultRegisteredExpireInMinutes;
 
-    public ScrapingActionServiceImpl(@Value("${tracking.defaultRegistrationExpireTime}") Long defaultRegisteredExpireInMinutes, List<ScrapeExecutor> scrapeExecutors, ProductTrackingRepository productTrackingRepository, RegisteredProductTrackingRepository registeredProductTrackingRepository, TaskScheduler taskScheduler) {
+    public ScrapingActionServiceImpl(@Value("${tracking.defaultRegistrationExpireTime}") Long defaultRegisteredExpireInMinutes, List<ScrapeExecutor> scrapeExecutors,
+                                     ProductTrackingRepository productTrackingRepository, RegisteredProductTrackingRepository registeredProductTrackingRepository, TaskScheduler taskScheduler) {
         this.productTrackingRepository = productTrackingRepository;
         this.defaultRegisteredExpireInMinutes = defaultRegisteredExpireInMinutes;
         this.registeredProductTrackingRepository = registeredProductTrackingRepository;

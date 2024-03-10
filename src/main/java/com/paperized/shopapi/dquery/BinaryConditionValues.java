@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BinaryConditionValues {
-    private String var;
-    private Object value;
+    private Object left;
+    private Object right;
 }

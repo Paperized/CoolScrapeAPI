@@ -1,4 +1,4 @@
-package com.paperized.shopapi.dquery;
+package com.paperized.shopapi.dquery.sort;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

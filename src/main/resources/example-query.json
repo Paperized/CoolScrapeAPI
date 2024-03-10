@@ -1,0 +1,29 @@
+{
+  "pageNum": null,
+  "query": {
+    "query": {
+      "not": [
+        {
+          "lte": [
+            {
+              "left": "#(newPrice)",
+              "right": 160.0
+            }
+          ]
+        }
+      ],
+      "eq": [
+        {
+          "left": "#(soldOut)",
+          "right": false
+        }
+      ]
+    },
+    "sort": [
+      {
+        "by": "newPrice",
+        "dir": "ASC"
+      }
+    ]
+  }
+}

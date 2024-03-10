@@ -1,5 +1,6 @@
-package com.paperized.shopapi.dquery;
+package com.paperized.shopapi.dquery.sort;
 
+import com.paperized.shopapi.dquery.DQueriable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
