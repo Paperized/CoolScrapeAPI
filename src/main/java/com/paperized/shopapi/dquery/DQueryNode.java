@@ -7,7 +7,6 @@ import lombok.Data;
 public class DQueryNode implements DQueryCondition {
     private NotCondition not;
     private OrCondition or;
-    private AndCondition and;
 
     private EqualsCondition eq;
     private GtCondition gt;
@@ -32,9 +31,7 @@ public class DQueryNode implements DQueryCondition {
             return false;
         if(not != null && !not.evaluate(qEntity))
             return false;
-        if(or != null && !or.evaluate(qEntity))
-            return false;
-        return and == null || !and.evaluate(qEntity);
+        return or == null || or.evaluate(qEntity);
     }
 
     @Override
@@ -53,8 +50,6 @@ public class DQueryNode implements DQueryCondition {
             return false;
         if(not != null && !not.evaluate(qEntity1, qEntity2))
             return false;
-        if(or != null && !or.evaluate(qEntity1, qEntity2))
-            return false;
-        return and == null || !and.evaluate(qEntity1, qEntity2);
+        return or == null || or.evaluate(qEntity1, qEntity2);
     }
 }

@@ -13,9 +13,11 @@ public class ProductTracking {
     @Column(name = "ID")
     private String id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "WEBSITE_NAME", nullable = false)
     private WebsiteName websiteName;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "ACTION", nullable = false)
     private TrackingAction action;
 

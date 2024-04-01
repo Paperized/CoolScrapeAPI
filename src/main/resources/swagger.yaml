@@ -49,13 +49,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AmazonProductTracked'
-  /tracking/{trackingId}/register-webhook:
+
+  /tracking/{trackingId}/listen:
     post:
       tags:
         - tracking
       summary: Register a webhook for this tracking id
       description: Register a webhook for this tracking id
-      operationId: registerTrackingWebhook
+      operationId: listenTrackingWebhook
       parameters:
         - in: path
           name: trackingId
@@ -71,22 +72,25 @@ paths:
       responses:
         '200':
           description: OK
-  /tracking/{trackingId}/deregister-webhook:
+
+  /tracking/{trackingId}/unlisten:
     delete:
       tags:
         - tracking
       summary: Remove webhook for this tracking id
       description: Remove webhook for this tracking id
-      operationId: unregisterTrackingWebhook
+      operationId: unlistenTrackingWebhook
       parameters:
         - in: path
           name: trackingId
           required: true
           schema:
             type: string
+
       responses:
         '200':
           description: OK
+
 components:
   schemas:
     TcgProductsTracked:
@@ -157,11 +161,13 @@ components:
       properties:
         url:
           type: string
+        query:
+          type: dquery
 
     ProductTrackingDto:
       type: object
       properties:
-        id:
+        trackingId:
           type: string
         webhookRegisterExpiresAt:
           type: string

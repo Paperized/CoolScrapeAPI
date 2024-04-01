@@ -33,7 +33,7 @@ public class TrackingServiceImpl implements TrackingService {
 
         ProductTracking savedTracking = productTrackingRepository.save(productTracking);
         return new ProductTrackingDto()
-                .id(savedTracking.getId())
+                .trackingId(savedTracking.getId())
                 .webhookRegisterExpiresAt(savedTracking.getWebhookRegisterExpiresAt());
     }
 }
