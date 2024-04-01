@@ -153,6 +153,7 @@ public interface {{classname}} {
     @ApiVirtual
     {{/virtualService}}
     {{#swagger2AnnotationLibrary}}
+
     @Operation(
         operationId = "{{{operationId}}}",
         {{#summary}}
@@ -185,6 +186,7 @@ public interface {{classname}} {
     )
     {{/swagger2AnnotationLibrary}}
     {{#swagger1AnnotationLibrary}}
+
     @ApiOperation(
         {{#vendorExtensions.x-tags.size}}
         tags = { {{#vendorExtensions.x-tags}}"{{tag}}"{{^-last}}, {{/-last}}{{/vendorExtensions.x-tags}} },
@@ -270,6 +272,44 @@ public interface {{classname}} {
         {{/isDelegate}}
     }{{/jdk8-default-interface}}
 
+    {{#swagger2AnnotationLibrary}}
+    {{#vendorExtensions.x-scrape-api}}
+    {{#responses}}
+    {{#produces}}
+    {{#baseType}}
+    @RequestMapping(method = RequestMethod.GET, value = "{{{path}}}/info")
+    default Map<String, String> {{{operationId}}}Schema() throws Exception {
+        {{/baseType}}
+        {{/produces}}
+        {{/responses}}
+        {{/vendorExtensions.x-scrape-api}}
+        {{/swagger2AnnotationLibrary}}
+
+        {{#vendorExtensions.x-scrape-api}}
+        String typeApi = "{{{vendorExtensions.x-scrape-api}}}";
+        {{/vendorExtensions.x-scrape-api}}
+
+        {{#swagger2AnnotationLibrary}}
+        {{#vendorExtensions.x-scrape-api}}
+        {{#responses}}
+        {{#produces}}
+        {{#baseType}}
+        java.lang.reflect.Field field = null;
+        if("array".equals(typeApi)) {
+            Class innerClass = ((Class)((java.lang.reflect.ParameterizedType) {{{baseType}}}.class.getDeclaredField("items").getGenericType()).getActualTypeArguments()[0]);
+            field = innerClass.getDeclaredField("__schema");
+        } else {
+            field = {{{baseType}}}.class.getDeclaredField("item").getType().getDeclaredField("__schema");
+        }
+
+        field.setAccessible(true);
+        return (Map<String, String>) field.get(null);
+    }
+    {{/baseType}}
+    {{/produces}}
+    {{/responses}}
+    {{/vendorExtensions.x-scrape-api}}
+    {{/swagger2AnnotationLibrary}}
 {{/operation}}
 }
 {{/operations}}

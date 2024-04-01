@@ -97,6 +97,13 @@ public class {{classname}}{{#parent}} extends {{{parent}}}{{/parent}}{{^parent}}
             default -> throw new RuntimeException("{{classname}}.{{name}} is not valid property");
         };
     }
+
+      private static Map<String, String> __schema = new HashMap<>() {{
+        {{#vars}}
+        put("{{name}}", "{{>nullableDataType}}");
+        {{/vars}}
+      }};
+
   {{/vendorExtensions.x-dqueriable}}
 
   {{#generatedConstructorWithRequiredArgs}}

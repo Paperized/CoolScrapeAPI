@@ -11,6 +11,7 @@ paths:
       tags:
         - tcg-store
       operationId: findSummaryProducts
+      x-scrape-api: array
       requestBody:
         content:
           application/json:
@@ -36,6 +37,7 @@ paths:
       summary: Find amazon product details
       description: Find amazon product details
       operationId: findProductDetails
+      x-scrape-api: object
       parameters:
         - in: query
           name: url
