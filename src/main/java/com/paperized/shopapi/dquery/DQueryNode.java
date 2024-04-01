@@ -3,8 +3,10 @@ package com.paperized.shopapi.dquery;
 import com.paperized.shopapi.dquery.func.*;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class DQueryNode implements DQueryCondition {
+public class DQueryNode implements DQueryCondition, Serializable {
     private NotCondition not;
     private OrCondition or;
 

@@ -3,10 +3,11 @@ package com.paperized.shopapi.dquery.pick;
 import com.paperized.shopapi.dquery.DQueriable;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class DPick {
+public class DPick implements Serializable {
     private Integer limit;
 
     public <T extends DQueriable> void pickQueriables(List<T> queriables) {

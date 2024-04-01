@@ -7,15 +7,17 @@ import com.paperized.shopapi.dquery.sort.DComparable;
 import com.paperized.shopapi.dquery.sort.DSort;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class DQueryRequestWebhook {
+public class DQueryRequestWebhook implements Serializable {
     private DQueryNode query;
     private DSort sort;
     private DPick pick;
     private boolean onlyIfDifferent;
 
+    //TODO: use onlyIfDifferent to calculate the diff and send back only if different from previous scrape
     public <T extends DQueriable> void filterQueriables(List<T> queriables) {
         if(query != null) {
             queriables.removeIf(curr -> !query.evaluate(curr));

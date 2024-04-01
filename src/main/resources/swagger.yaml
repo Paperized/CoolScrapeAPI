@@ -162,7 +162,7 @@ components:
         url:
           type: string
         query:
-          type: dquery
+          type: dquerynodeT
 
     ProductTrackingDto:
       type: object

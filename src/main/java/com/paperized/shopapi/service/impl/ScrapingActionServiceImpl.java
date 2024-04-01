@@ -1,5 +1,9 @@
 package com.paperized.shopapi.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.paperized.shopapi.dquery.DQueriable;
+import com.paperized.shopapi.dto.DQueryRequestWebhook;
 import com.paperized.shopapi.dto.WebhookScrapeInput;
 import com.paperized.shopapi.exceptions.TrackingAlreadyScheduledException;
 import com.paperized.shopapi.exceptions.TrackingExpiredException;
@@ -92,7 +96,7 @@ public class ScrapingActionServiceImpl implements ScrapingActionService {
 
     @Transactional
     @Override
-    public void scheduleTrackingListening(final String trackingId, final String url, final long intervalMs) throws TrackingAlreadyScheduledException, TrackingExpiredException {
+    public void scheduleTrackingListening(final String trackingId, final String url, final long intervalMs, final DQueryRequestWebhook filters) throws TrackingAlreadyScheduledException, TrackingExpiredException {
         if(StringUtils.isBlank(url)) {
             // check later for the spring exception used
             // check later with regex if it's an url
@@ -118,6 +122,7 @@ public class ScrapingActionServiceImpl implements ScrapingActionService {
         RegisteredProductTracking registeredTracking = new RegisteredProductTracking();
         registeredTracking.setId(productTracking.getId());
         registeredTracking.setWebhookUrl(url);
+        registeredTracking.setFilters(filters);
         registeredTracking.setIntervalDuration(intervalMs);
         registeredTracking.setProductTracking(productTracking);
         registeredTracking = registeredProductTrackingRepository.save(registeredTracking);
@@ -169,9 +174,20 @@ public class ScrapingActionServiceImpl implements ScrapingActionService {
                 scrapedResult = replicateScrapeAction(tracking.getUrl(), tracking.getWebsiteName(), tracking.getAction());
                 logger.info("Successfully scraped product with tracking id: {}", trackingId);
 
+                if(tracking.getAction().isReturnsList() && registeredTracking.getFilters() != null) {
+                    List<? extends DQueriable> scrapedList = (List<? extends DQueriable>) scrapedResult;
+                    registeredTracking.getFilters().filterQueriables(scrapedList);
+                    logger.info("Filtered scheduled scraped list with tracking id: {}", trackingId);
+                }
+
+                String resultTest = new ObjectMapper().writeValueAsString(scrapedResult);
+                logger.info(resultTest);
+
                 makeWebhookRequest(trackingId, registeredTracking.getWebhookUrl(), scrapedResult);
             } catch (HttpStatusException | UnsuccessfulScrapeException e) {
                 logger.error(e.getMessage());
+            } catch (JsonProcessingException e) {
+                logger.error("Logging test result failed: {}", e.getMessage());
             }
         };
     }

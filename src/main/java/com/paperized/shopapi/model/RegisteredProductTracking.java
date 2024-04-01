@@ -1,6 +1,7 @@
 package com.paperized.shopapi.model;
 
 import com.paperized.shopapi.dquery.DQueryRequest;
+import com.paperized.shopapi.dto.DQueryRequestWebhook;
 import com.paperized.shopapi.model.converter.DQueryRequestConverter;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -18,7 +19,7 @@ public class RegisteredProductTracking {
 
     @Column(name = "REQUEST_QUERY", nullable = true)
     @Convert(converter = DQueryRequestConverter.class)
-    private DQueryRequest request;
+    private DQueryRequestWebhook filters;
 
     @Column(name = "INTERVAL_DURATION", nullable = false)
     private long intervalDuration;
