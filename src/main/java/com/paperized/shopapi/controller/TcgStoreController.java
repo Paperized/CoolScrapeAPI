@@ -19,13 +19,16 @@ public class TcgStoreController implements TcgStoreApi {
     public ResponseEntity<TcgProductsTracked> findSummaryProducts(FindSummaryProductsRequest body) throws Exception {
         TcgProductsTracked trackableResult;
 
-        if(body.getPageNum() != null) {
+        if(body != null && body.getPageNum() != null) {
             trackableResult = tcgStoreService.findSummaryProducts(body.getPageNum());
         } else {
             trackableResult = tcgStoreService.findSummaryAllProducts();
         }
 
-        body.getQuery().filterQueriables(trackableResult.getItems());
+        if(body != null && body.getQuery() != null) {
+            body.getQuery().filterQueriables(trackableResult.getItems());
+        }
+
         return ResponseEntity.ok(trackableResult);
     }
 }
