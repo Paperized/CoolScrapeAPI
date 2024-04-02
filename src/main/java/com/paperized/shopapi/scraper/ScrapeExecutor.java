@@ -1,12 +1,17 @@
 package com.paperized.shopapi.scraper;
 
+import com.paperized.shopapi.config.ScraperSettings;
+import com.paperized.shopapi.dto.WebsiteSetting;
 import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;
 import com.paperized.shopapi.model.TrackingAction;
 import com.paperized.shopapi.model.WebsiteName;
 import com.paperized.shopapi.scraper.annotations.ScrapeAction;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.HttpStatusException;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
@@ -19,10 +24,22 @@ import java.util.Map;
 import static java.lang.String.format;
 
 public abstract class ScrapeExecutor {
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     private String className;
     private final Map<TrackingAction, ScrapeFunction> actionFunctionMap = new HashMap<>();
 
+    @Getter
+    private final WebsiteName websiteName;
+    protected final WebsiteSetting websiteSetting;
+
     public ScrapeExecutor() {
+        this.websiteSetting = null;
+        this.websiteName = null;
+    }
+
+    public ScrapeExecutor(ScraperSettings scraperSettings, WebsiteName websiteName) {
+        this.websiteName = websiteName;
+        websiteSetting = scraperSettings.fromName(websiteName);
         initializeActionFunctionMap();
     }
 
@@ -42,10 +59,6 @@ public abstract class ScrapeExecutor {
         //noinspection unchecked
         return (T) fn.call(url);
     }
-
-    public abstract WebsiteName getWebsiteName();
-
-    protected abstract Logger getLogger();
 
     private void initializeActionFunctionMap() {
         var clazz = getClass();
@@ -87,10 +100,7 @@ public abstract class ScrapeExecutor {
                         try {
                             Object res = method.invoke(this, url);
                             if (s.getRetryCount() > 0) {
-                                Logger logger = getLogger();
-                                if(logger != null) {
-                                    logger.info("Scrape took {} more tries!", s.getRetryCount());
-                                }
+                                logger.info("Scrape took {} more tries!", s.getRetryCount());
                             }
                             return res;
                         } catch (InvocationTargetException e) {

@@ -29,7 +29,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TcgProductsTracked'
-
   /amazon/find-product-details:
     post:
       tags:
@@ -51,7 +50,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AmazonProductTracked'
-
+  /steam/profile:
+    post:
+      tags:
+        - Steam
+      summary: Find steam profile info
+      description: Find steam profile info
+      operationId: findSteamProfile
+      x-scrape-api: object
+      parameters:
+        - in: query
+          name: url
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SteamProfileTracked'
   /tracking/{trackingId}/listen:
     post:
       tags:
@@ -74,7 +93,6 @@ paths:
       responses:
         '200':
           description: OK
-
   /tracking/{trackingId}/unlisten:
     delete:
       tags:
@@ -111,6 +129,25 @@ components:
           $ref: '#/components/schemas/AmazonProductDto'
         track:
           $ref: '#/components/schemas/ProductTrackingDto'
+
+    SteamProfileTracked:
+      type: object
+      properties:
+        item:
+          $ref: '#/components/schemas/SteamProfileDto'
+        track:
+          $ref: '#/components/schemas/ProductTrackingDto'
+
+    SteamProfileDto:
+      type: object
+      x-dqueriable: true
+      properties:
+        name:
+          type: string
+        online:
+          type: boolean
+        playingAt:
+          type: string
 
     TcgProductDto:
       type: object

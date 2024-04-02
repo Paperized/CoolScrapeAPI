@@ -55,7 +55,7 @@ public class ScraperHttpServiceImpl implements ScraperHttpService {
 
     private static Map<String, String> emptyHeadersIfNull(Map<String, String> headers) {
         if(headers == null)
-            return new HashMap<>();
+            return Map.of();
         return headers;
     }
 }

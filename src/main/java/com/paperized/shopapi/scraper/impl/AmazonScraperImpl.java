@@ -23,13 +23,11 @@ import java.math.BigDecimal;
 
 @Service
 public class AmazonScraperImpl extends ScrapeExecutor implements AmazonScraper {
-    private final Logger logger = LoggerFactory.getLogger(AmazonScraperImpl.class);
     private final ScraperHttpService scraperHttpService;
-    private final WebsiteSetting websiteSetting;
 
     public AmazonScraperImpl(ScraperHttpService scraperHttpService, ScraperSettings scraperSettings) {
+        super(scraperSettings, WebsiteName.Amazon);
         this.scraperHttpService = scraperHttpService;
-        websiteSetting = scraperSettings.fromName(getWebsiteName());
     }
 
     @Override
@@ -84,16 +82,6 @@ public class AmazonScraperImpl extends ScrapeExecutor implements AmazonScraper {
 
         // at least current price is needed to be a successful scrape
         return amazonProduct.getCurrentPrice() != null;
-    }
-
-    @Override
-    public WebsiteName getWebsiteName() {
-        return WebsiteName.Amazon;
-    }
-
-    @Override
-    protected Logger getLogger() {
-        return logger;
     }
 
     private Double tryConvertPriceToDouble(String price) {

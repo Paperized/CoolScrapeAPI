@@ -25,13 +25,11 @@ import java.util.List;
 
 @Service
 public class TcgStoreScraperImpl extends ScrapeExecutor implements TcgStoreScraper {
-    private final Logger logger = LoggerFactory.getLogger(TcgStoreScraperImpl.class);
     private final ScraperHttpService scraperHttpService;
-    private final WebsiteSetting websiteSetting;
 
     public TcgStoreScraperImpl(ScraperHttpService scraperHttpService, ScraperSettings scraperSettings) {
+        super(scraperSettings, WebsiteName.TcgStore);
         this.scraperHttpService = scraperHttpService;
-        websiteSetting = scraperSettings.fromName(getWebsiteName());
     }
 
     @Override
@@ -128,16 +126,6 @@ public class TcgStoreScraperImpl extends ScrapeExecutor implements TcgStoreScrap
                 .img(imgUrl)
                 .oldPrice(StringUtils.isBlank(oldPrice) ? null : tryConvertPriceToDouble(oldPrice.substring(1)))
                 .newPrice(StringUtils.isBlank(newPrice) ? null : tryConvertPriceToDouble(newPrice.substring(1)));
-    }
-
-    @Override
-    public WebsiteName getWebsiteName() {
-        return WebsiteName.TcgStore;
-    }
-
-    @Override
-    protected Logger getLogger() {
-        return logger;
     }
 
     private Double tryConvertPriceToDouble(String price) {

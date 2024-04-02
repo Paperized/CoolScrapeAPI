@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum TrackingAction {
     AMAZON_PRODUCT_DETAILS(false),
     TCGSTORE_SUMMARY_PRODUCTS(true),
-    TCGSTORE_ALL_SUMMARY_PRODUCTS(true);
+    TCGSTORE_ALL_SUMMARY_PRODUCTS(true),
+    STEAM_FIND_PROFILE(false);
 
     private final boolean returnsList;
 

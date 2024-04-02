@@ -14,6 +14,12 @@ scraper-settings:
             extraHeaders: [ ]
             customProperties:
                 find-summary-products: https://tcg-store.it/home/giochi-di-carte/
+        steam:
+            base-url: https://steamcommunity.com
+            availableHeaders:
+                - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
+            extraHeaders: [ ]
+            customProperties: []
 
 tracking:
     defaultRegistrationExpireTime: 1 # minutes
