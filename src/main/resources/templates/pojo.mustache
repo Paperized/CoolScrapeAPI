@@ -104,6 +104,11 @@ public class {{classname}}{{#parent}} extends {{{parent}}}{{/parent}}{{^parent}}
         {{/vars}}
       }};
 
+    @Override
+    public String getUniqueIdentifier() {
+        return String.format("%s{{#vendorExtensions.x-dqueriable.id-composition}}_%s{{/vendorExtensions.x-dqueriable.id-composition}}", "{{classname}}"{{#vendorExtensions.x-dqueriable.id-composition}}, ""+{{.}}{{/vendorExtensions.x-dqueriable.id-composition}});
+    }
+
   {{/vendorExtensions.x-dqueriable}}
 
   {{#generatedConstructorWithRequiredArgs}}

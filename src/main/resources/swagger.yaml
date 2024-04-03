@@ -140,7 +140,8 @@ components:
 
     SteamProfileDto:
       type: object
-      x-dqueriable: true
+      x-dqueriable:
+        id-composition: [name]
       properties:
         name:
           type: string
@@ -151,7 +152,8 @@ components:
 
     TcgProductDto:
       type: object
-      x-dqueriable: true
+      x-dqueriable:
+        id-composition: [url]
       properties:
         name:
           type: string
@@ -172,7 +174,8 @@ components:
 
     AmazonProductDto:
       type: object
-      x-dqueriable: true
+      x-dqueriable:
+        id-composition: [name]
       properties:
         name:
           type: string

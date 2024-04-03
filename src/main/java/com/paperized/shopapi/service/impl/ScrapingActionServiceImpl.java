@@ -16,6 +16,7 @@ import com.paperized.shopapi.repository.ProductTrackingRepository;
 import com.paperized.shopapi.repository.RegisteredProductTrackingRepository;
 import com.paperized.shopapi.scraper.ScrapeExecutor;
 import com.paperized.shopapi.service.ScrapingActionService;
+import com.paperized.shopapi.utils.AppUtils;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -59,7 +61,7 @@ public class ScrapingActionServiceImpl implements ScrapingActionService {
         this.taskScheduler = taskScheduler;
         scrapeExecutors.forEach(x -> {
             ScrapeExecutor prev = this.scrapeExecutorMap.put(x.getWebsiteName(), x);
-            if(prev != null) {
+            if (prev != null) {
                 throw new RuntimeException("Internal error, more then one ScrapeExecutor have the same websiteName: " + x.getWebsiteName());
             }
         });
@@ -68,7 +70,7 @@ public class ScrapingActionServiceImpl implements ScrapingActionService {
     @PostConstruct
     public void rescheduleProductTrackings() {
         List<RegisteredProductTracking> trackingList = registeredProductTrackingRepository.findAll();
-        for(RegisteredProductTracking tracking : trackingList) {
+        for (RegisteredProductTracking tracking : trackingList) {
             Runnable runnable = getProductTrackingRunnable(tracking.getId());
 
             // Restart each schedule after 1 minute after the startup
@@ -97,24 +99,24 @@ public class ScrapingActionServiceImpl implements ScrapingActionService {
     @Transactional
     @Override
     public void scheduleTrackingListening(final String trackingId, final String url, final long intervalMs, final DQueryRequestWebhook filters) throws TrackingAlreadyScheduledException, TrackingExpiredException {
-        if(StringUtils.isBlank(url)) {
+        if (StringUtils.isBlank(url)) {
             // check later for the spring exception used
             // check later with regex if it's an url
-           throw new RuntimeException("Url must be provided");
+            throw new RuntimeException("Url must be provided");
         }
-        if(intervalMs <= 0) {
+        if (intervalMs <= 0) {
             throw new RuntimeException("Internal error, interval is less or equal to 0");
         }
-        if(currentScheduledProductTracking.containsKey(trackingId)) {
+        if (currentScheduledProductTracking.containsKey(trackingId)) {
             throw new TrackingAlreadyScheduledException(format("Request of tracking schedule but Tracking id: %s was already scheduled!", trackingId));
         }
 
         ProductTracking productTracking = productTrackingRepository.findById(trackingId)
                 .orElseThrow(() -> new EntityNotFoundException(format("Schedule requested but the Tracking id: %s no longed exists!", trackingId)));
-        if(productTracking.getRegisteredProductTracking() != null) {
+        if (productTracking.getRegisteredProductTracking() != null) {
             throw new TrackingAlreadyScheduledException(format("Request of tracking schedule but Tracking id: %s was already scheduled!", trackingId));
         }
-        if(productTracking.getWebhookRegisterExpiresAt().isBefore(LocalDateTime.now())) {
+        if (productTracking.getWebhookRegisterExpiresAt().isBefore(LocalDateTime.now())) {
             throw new TrackingExpiredException(format("Request of tracking schedule Tracking id: %s failed because it expired in %s",
                     trackingId, productTracking.getWebhookRegisterExpiresAt()));
         }
@@ -139,7 +141,7 @@ public class ScrapingActionServiceImpl implements ScrapingActionService {
     @Transactional
     @Override
     public void unscheduleTrackingListening(String trackingId) {
-        if(!currentScheduledProductTracking.containsKey(trackingId)) {
+        if (!currentScheduledProductTracking.containsKey(trackingId)) {
             return;
         }
 
@@ -157,14 +159,14 @@ public class ScrapingActionServiceImpl implements ScrapingActionService {
     private Runnable getProductTrackingRunnable(String trackingId) {
         return () -> {
             Optional<ProductTracking> trackingOptional = productTrackingRepository.findById(trackingId);
-            if(trackingOptional.isEmpty()) {
+            if (trackingOptional.isEmpty()) {
                 logger.error("Tracking with id: {} no longer exists!", trackingId);
                 return;
             }
 
             ProductTracking tracking = trackingOptional.get();
             RegisteredProductTracking registeredTracking = tracking.getRegisteredProductTracking();
-            if(registeredTracking == null) {
+            if (registeredTracking == null) {
                 logger.error("Tracking with id: {} has no registered webhook!", trackingId);
                 return;
             }
@@ -174,13 +176,65 @@ public class ScrapingActionServiceImpl implements ScrapingActionService {
                 scrapedResult = replicateScrapeAction(tracking.getUrl(), tracking.getWebsiteName(), tracking.getAction());
                 logger.info("Successfully scraped product with tracking id: {}", trackingId);
 
-                if(tracking.getAction().isReturnsList() && registeredTracking.getFilters() != null) {
+                boolean returnsList = tracking.getAction().isReturnsList();
+                boolean hasFilters = registeredTracking.getFilters() != null;
+                if (returnsList && hasFilters) {
                     List<? extends DQueriable> scrapedList = (List<? extends DQueriable>) scrapedResult;
                     registeredTracking.getFilters().filterQueriables(scrapedList);
                     logger.info("Filtered scheduled scraped list with tracking id: {}", trackingId);
                 }
 
-                String resultTest = new ObjectMapper().writeValueAsString(scrapedResult);
+                // registeredTracking.getFilters().isOnlyIfDifferent()
+                // registeredTracking.getLastScrapedDataAs(tracking.getAction()) -> LAST_DATA
+                // check flag isOnlyIfDifferent and if LAST_DATA != scrapedResult
+                // if single -> .equals | if multiple -> check if there is any change in entries between last data and current, for each item check the UniqueIdentifier and check the corrisponding item in the other list
+                Object prevData = registeredTracking.getLastScrapedDataAs(tracking.getAction());
+                boolean prevDataChanged = false;
+
+                if (hasFilters && registeredTracking.getFilters().isOnlyIfDifferent()) {
+                    if (prevData != null) {
+                        if (returnsList) {
+                            List<? extends DQueriable> convertedPrevData = (List<? extends DQueriable>) prevData;
+                            List<? extends DQueriable> scrapedList = (List<? extends DQueriable>) scrapedResult;
+
+                            if (scrapedList == null ^ convertedPrevData == null) {
+                                logger.info("One of the two lists are empty/null!");
+                                prevDataChanged = true;
+                            } else if (convertedPrevData.size() != scrapedList.size()) {
+                                logger.info("Lists have different sizes!");
+                                prevDataChanged = true;
+                            } else {
+                                boolean sameList = scrapedList.stream().allMatch(curr -> {
+                                    DQueriable other = convertedPrevData.stream()
+                                            .filter(x -> org.apache.commons.lang3.StringUtils.equals(x.getUniqueIdentifier(), curr.getUniqueIdentifier()))
+                                            .findFirst().orElse(null);
+
+                                    return other != null && other.equals(curr);
+                                });
+
+                                prevDataChanged = !sameList;
+                            }
+
+                        } else {
+                            prevDataChanged = scrapedResult.equals(prevData);
+                        }
+
+                        if (!prevDataChanged) {
+                            logger.info("Previous data was equal to the current one scraped, webhook will not be called due to filters!");
+                            return;
+                        }
+
+                    } else {
+                        prevDataChanged = true;
+                    }
+                }
+
+                if (prevDataChanged) {
+                    registeredTracking.setLastScrapedDataJson(AppUtils.toJson(scrapedResult));
+                    registeredProductTrackingRepository.save(registeredTracking);
+                }
+
+                String resultTest = AppUtils.toJson(scrapedResult);
                 logger.info(resultTest);
 
                 makeWebhookRequest(trackingId, registeredTracking.getWebhookUrl(), scrapedResult);
