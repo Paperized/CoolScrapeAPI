@@ -104,6 +104,8 @@ public class {{classname}}{{#parent}} extends {{{parent}}}{{/parent}}{{^parent}}
         {{/vars}}
       }};
 
+    @Schema(name = "__uniqueId", description = "Unique id", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @JsonProperty("__uniqueId")
     @Override
     public String getUniqueIdentifier() {
         return String.format("%s{{#vendorExtensions.x-dqueriable.id-composition}}_%s{{/vendorExtensions.x-dqueriable.id-composition}}", "{{classname}}"{{#vendorExtensions.x-dqueriable.id-composition}}, ""+{{.}}{{/vendorExtensions.x-dqueriable.id-composition}});
