@@ -3,11 +3,10 @@ package com.paperized.shopapi.scraper;
 import com.paperized.shopapi.config.ScraperSettings;
 import com.paperized.shopapi.dto.WebsiteSetting;
 import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;
-import com.paperized.shopapi.model.TrackingAction;
+import com.paperized.shopapi.model.TrackerAction;
 import com.paperized.shopapi.model.WebsiteName;
 import com.paperized.shopapi.scraper.annotations.ScrapeAction;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.HttpStatusException;
 import org.slf4j.Logger;
@@ -26,7 +25,7 @@ import static java.lang.String.format;
 public abstract class ScrapeExecutor {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     private String className;
-    private final Map<TrackingAction, ScrapeFunction> actionFunctionMap = new HashMap<>();
+    private final Map<TrackerAction, ScrapeFunction> actionFunctionMap = new HashMap<>();
 
     @Getter
     private final WebsiteName websiteName;
@@ -43,7 +42,7 @@ public abstract class ScrapeExecutor {
         initializeActionFunctionMap();
     }
 
-    public <T> T executeScrapeAction(TrackingAction action, String url) throws HttpStatusException, UnsuccessfulScrapeException {
+    public <T> T executeScrapeAction(TrackerAction action, String url) throws HttpStatusException, UnsuccessfulScrapeException {
         if(action == null) {
             throw new RuntimeException(format("(%s) Tracking action is null", className));
         }

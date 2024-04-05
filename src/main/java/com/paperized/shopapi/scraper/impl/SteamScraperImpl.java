@@ -3,7 +3,7 @@ package com.paperized.shopapi.scraper.impl;
 import com.paperized.generated.shopapi.model.SteamProfileDto;
 import com.paperized.shopapi.config.ScraperSettings;
 import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;
-import com.paperized.shopapi.model.TrackingAction;
+import com.paperized.shopapi.model.TrackerAction;
 import com.paperized.shopapi.model.WebsiteName;
 import com.paperized.shopapi.scraper.ScrapeExecutor;
 import com.paperized.shopapi.scraper.ScraperHttpService;
@@ -26,10 +26,10 @@ public class SteamScraperImpl extends ScrapeExecutor implements SteamScraper {
 
     @Override
     public SteamProfileDto findSteamProfile(String url) throws HttpStatusException, UnsuccessfulScrapeException {
-        return executeScrapeAction(TrackingAction.STEAM_FIND_PROFILE, url);
+        return executeScrapeAction(TrackerAction.STEAM_FIND_PROFILE, url);
     }
 
-    @ScrapeAction(action = TrackingAction.STEAM_FIND_PROFILE, retryTimes = 1, intervalRetry = 1000)
+    @ScrapeAction(action = TrackerAction.STEAM_FIND_PROFILE, retryTimes = 1, intervalRetry = 1000)
     private SteamProfileDto findSteamProfileInternal(String url) throws HttpStatusException, UnsuccessfulScrapeException {
         if(!url.startsWith(websiteSetting.getBaseUrl())) {
             throw new UnsuccessfulScrapeException("Url is not a steam recognized url!");

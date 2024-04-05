@@ -2,9 +2,8 @@ package com.paperized.shopapi.scraper.impl;
 
 import com.paperized.generated.shopapi.model.AmazonProductDto;
 import com.paperized.shopapi.config.ScraperSettings;
-import com.paperized.shopapi.dto.WebsiteSetting;
 import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;
-import com.paperized.shopapi.model.TrackingAction;
+import com.paperized.shopapi.model.TrackerAction;
 import com.paperized.shopapi.model.WebsiteName;
 import com.paperized.shopapi.scraper.AmazonScraper;
 import com.paperized.shopapi.scraper.ScrapeExecutor;
@@ -15,11 +14,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
 
 @Service
 public class AmazonScraperImpl extends ScrapeExecutor implements AmazonScraper {
@@ -32,10 +27,10 @@ public class AmazonScraperImpl extends ScrapeExecutor implements AmazonScraper {
 
     @Override
     public AmazonProductDto findProductDetails(String url) throws HttpStatusException, UnsuccessfulScrapeException {
-        return executeScrapeAction(TrackingAction.AMAZON_PRODUCT_DETAILS, url);
+        return executeScrapeAction(TrackerAction.AMAZON_PRODUCT_DETAILS, url);
     }
 
-    @ScrapeAction(action = TrackingAction.AMAZON_PRODUCT_DETAILS, retryTimes = 1, intervalRetry = 2000)
+    @ScrapeAction(action = TrackerAction.AMAZON_PRODUCT_DETAILS, retryTimes = 1, intervalRetry = 2000)
     protected AmazonProductDto findProductDetailsInternal(String url) throws HttpStatusException, UnsuccessfulScrapeException {
         AmazonProductDto amazonProduct = new AmazonProductDto();
         Document page = scraperHttpService.getPage(url, websiteSetting);

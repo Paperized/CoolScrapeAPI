@@ -9,9 +9,9 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 @Entity
-@Table(name = "REGISTERED_PRODUCT_TRACKING")
+@Table(name = "PRODUCT_TRACKER_DETAILS")
 @Data
-public class RegisteredProductTracking {
+public class ProductTrackerDetails {
     @Id
     @Column(name = "ID")
     private String id;
@@ -29,14 +29,14 @@ public class RegisteredProductTracking {
     @Column(name = "LAST_DATA", nullable = true)
     private String lastScrapedDataJson;
 
-    @OneToOne(mappedBy = "registeredProductTracking")
-    private ProductTracking productTracking;
+    @OneToOne(mappedBy = "productTrackerDetails")
+    private ProductTracker productTracker;
 
-    public Object getLastScrapedDataAs(TrackingAction trackingAction) throws JsonProcessingException {
+    public Object getLastScrapedDataAs(TrackerAction trackerAction) throws JsonProcessingException {
         if(StringUtils.isBlank(lastScrapedDataJson)) {
             return null;
         }
 
-        return AppUtils.fromJson(lastScrapedDataJson, trackingAction);
+        return AppUtils.fromJson(lastScrapedDataJson, trackerAction);
     }
 }

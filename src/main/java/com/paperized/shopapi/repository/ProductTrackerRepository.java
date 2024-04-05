@@ -1,10 +1,10 @@
 package com.paperized.shopapi.repository;
 
-import com.paperized.shopapi.model.ProductTracking;
+import com.paperized.shopapi.model.ProductTracker;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProductTrackingRepository extends JpaRepository<ProductTracking, String> {
+public interface ProductTrackerRepository extends JpaRepository<ProductTracker, String> {
 
 }

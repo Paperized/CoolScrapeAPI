@@ -1,15 +1,11 @@
 package com.paperized.shopapi.service;
 
-import com.paperized.shopapi.dto.DQueryRequestWebhook;
-import com.paperized.shopapi.exceptions.TrackingAlreadyScheduledException;
 import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;
-import com.paperized.shopapi.model.TrackingAction;
+import com.paperized.shopapi.model.TrackerAction;
 import com.paperized.shopapi.model.WebsiteName;
 import org.jsoup.HttpStatusException;
 
 public interface ScrapingActionService {
-    <T> T replicateByTrackingId(String trackingId) throws HttpStatusException, UnsuccessfulScrapeException;
-    <T> T replicateScrapeAction(String url, WebsiteName websiteName, TrackingAction trackingAction) throws HttpStatusException, UnsuccessfulScrapeException;
-    void scheduleTrackingListening(final String trackingId, final String url, final long intervalMs, final DQueryRequestWebhook filters) throws TrackingAlreadyScheduledException;
-    void unscheduleTrackingListening(String trackingId);
+    <T> T replicateByTrackingId(String trackerId) throws HttpStatusException, UnsuccessfulScrapeException;
+    <T> T replicateScrapeAction(String url, WebsiteName websiteName, TrackerAction trackerAction) throws HttpStatusException, UnsuccessfulScrapeException;
 }

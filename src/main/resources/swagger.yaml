@@ -90,15 +90,12 @@ paths:
           schema:
             type: string
         - $ref: '#/components/parameters/WebhookUrl'
-        - $ref: '#/components/parameters/NotifySendOnlyDifferences'
+        - $ref: '#/components/parameters/NotifyOnlyIfDifferent'
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                query:
-                  type: dquery
+              type: dquery
       responses:
         '200':
           description: Successful operation
@@ -141,7 +138,7 @@ paths:
           schema:
             type: string
         - $ref: '#/components/parameters/WebhookUrl'
-        - $ref: '#/components/parameters/NotifySendOnlyDifferences'
+        - $ref: '#/components/parameters/NotifyOnlyIfDifferent'
       responses:
         '200':
           description: Successful operation
@@ -150,16 +147,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/SteamProfileTracked'
 
-  /tracking/{trackingId}/unlisten:
+  /tracking/{trackerId}/unlisten:
     delete:
       tags:
-        - tracking
+        - tracker
       summary: Remove webhook for this tracking id
       description: Remove webhook for this tracking id
-      operationId: unlistenTrackingWebhook
+      operationId: unlistenTrackerWebhook
       parameters:
         - in: path
-          name: trackingId
+          name: trackerId
           required: true
           schema:
             type: string
@@ -176,7 +173,7 @@ components:
           items:
             $ref: '#/components/schemas/TcgProductDto'
         track:
-          $ref: '#/components/schemas/ProductTrackingDto'
+          $ref: '#/components/schemas/TrackerInfoDto'
 
     AmazonProductTracked:
       type: object
@@ -184,7 +181,7 @@ components:
         item:
           $ref: '#/components/schemas/AmazonProductDto'
         track:
-          $ref: '#/components/schemas/ProductTrackingDto'
+          $ref: '#/components/schemas/TrackerInfoDto'
 
     SteamProfileTracked:
       type: object
@@ -192,7 +189,7 @@ components:
         item:
           $ref: '#/components/schemas/SteamProfileDto'
         track:
-          $ref: '#/components/schemas/ProductTrackingDto'
+          $ref: '#/components/schemas/TrackerInfoDto'
 
     SteamProfileDto:
       type: object
@@ -252,10 +249,10 @@ components:
           format: double
           description: suggested price of product
 
-    ProductTrackingDto:
+    TrackerInfoDto:
       type: object
       properties:
-        trackingId:
+        trackerId:
           type: string
 
   parameters:
@@ -271,10 +268,12 @@ components:
       name: onlyIfDifferent
       schema:
         type: boolean
+        default: false
     NotifySendOnlyDifferences:
       in: query
       required: false
       name: sendOnlyDifferences
       schema:
         type: boolean
+        default: false
 

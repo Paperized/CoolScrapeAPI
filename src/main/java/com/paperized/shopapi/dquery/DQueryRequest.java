@@ -4,6 +4,8 @@ import com.paperized.shopapi.dquery.pick.DPick;
 import com.paperized.shopapi.dquery.sort.DComparable;
 import com.paperized.shopapi.dquery.sort.DSort;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serializable;
 import java.util.List;

@@ -128,7 +128,6 @@
 							<typeMappings>
 								<typeMapping>DateTime=java.time.LocalDateTime</typeMapping>
 								<typeMapping>Date=java.time.LocalDateTime</typeMapping>
-								<typeMapping>dquerynodeT=com.paperized.shopapi.dto.DQueryRequestWebhook</typeMapping>
 								<typeMapping>dquerynode=com.paperized.shopapi.dquery.DQueryNode</typeMapping>
 								<typeMapping>dquery=com.paperized.shopapi.dquery.DQueryRequest</typeMapping>
 							</typeMappings>

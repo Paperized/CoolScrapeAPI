@@ -108,7 +108,7 @@ public class {{classname}}{{#parent}} extends {{{parent}}}{{/parent}}{{^parent}}
     @JsonProperty("__uniqueId")
     @Override
     public String getUniqueIdentifier() {
-        return String.format("%s{{#vendorExtensions.x-dqueriable.id-composition}}_%s{{/vendorExtensions.x-dqueriable.id-composition}}", "{{classname}}"{{#vendorExtensions.x-dqueriable.id-composition}}, ""+{{.}}{{/vendorExtensions.x-dqueriable.id-composition}});
+        return String.format("{{classname}}{{#vendorExtensions.x-dqueriable.id-composition}}_%s{{/vendorExtensions.x-dqueriable.id-composition}}"{{#vendorExtensions.x-dqueriable.id-composition}}, {{.}}{{/vendorExtensions.x-dqueriable.id-composition}});
     }
 
   {{/vendorExtensions.x-dqueriable}}

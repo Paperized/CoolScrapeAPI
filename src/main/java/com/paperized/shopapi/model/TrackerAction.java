@@ -7,7 +7,7 @@ import com.paperized.shopapi.dquery.DQueriable;
 import lombok.Getter;
 
 @Getter
-public enum TrackingAction {
+public enum TrackerAction {
     AMAZON_PRODUCT_DETAILS(false, AmazonProductDto.class),
     TCGSTORE_SUMMARY_PRODUCTS(true, TcgProductDto.class),
     TCGSTORE_ALL_SUMMARY_PRODUCTS(true, TcgProductDto.class),
@@ -16,7 +16,7 @@ public enum TrackingAction {
     private final boolean returnsList;
     private final Class<? extends DQueriable> clazz;
 
-    TrackingAction(boolean returnsList, Class<? extends DQueriable> clazz) {
+    TrackerAction(boolean returnsList, Class<? extends DQueriable> clazz) {
         this.returnsList = returnsList;
         this.clazz = clazz;
     }

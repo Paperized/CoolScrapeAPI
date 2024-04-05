@@ -1,35 +1,46 @@
 package com.paperized.shopapi.service.impl;
 
-import com.paperized.generated.shopapi.model.*;
+import com.paperized.generated.shopapi.model.SteamProfileDto;
+import com.paperized.generated.shopapi.model.SteamProfileTracked;
+import com.paperized.generated.shopapi.model.TrackerInfoDto;
+import com.paperized.shopapi.dto.DQueryRequestWebhook;
+import com.paperized.shopapi.exceptions.TrackingAlreadyScheduledException;
 import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;
-import com.paperized.shopapi.model.TrackingAction;
+import com.paperized.shopapi.model.TrackerAction;
 import com.paperized.shopapi.model.WebsiteName;
-import com.paperized.shopapi.scraper.AmazonScraper;
 import com.paperized.shopapi.scraper.SteamScraper;
-import com.paperized.shopapi.service.AmazonService;
+import com.paperized.shopapi.service.ProductTrackerScheduler;
+import com.paperized.shopapi.service.ProductTrackerService;
 import com.paperized.shopapi.service.SteamService;
-import com.paperized.shopapi.service.TrackingService;
 import org.jsoup.HttpStatusException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SteamServiceImpl implements SteamService {
     private final SteamScraper steamScraper;
-    private final TrackingService trackingService;
+    private final ProductTrackerService productTrackerService;
+    private final ProductTrackerScheduler productTrackerScheduler;
 
-    public SteamServiceImpl(SteamScraper steamScraper, TrackingService trackingService) {
+    public SteamServiceImpl(SteamScraper steamScraper, ProductTrackerService productTrackerService, ProductTrackerScheduler productTrackerScheduler) {
         this.steamScraper = steamScraper;
-        this.trackingService = trackingService;
+        this.productTrackerService = productTrackerService;
+        this.productTrackerScheduler = productTrackerScheduler;
     }
 
     @Override
-    public SteamProfileTracked findSteamProfileTracked(String url) throws HttpStatusException, UnsuccessfulScrapeException {
+    public SteamProfileTracked findSteamProfileTracked(String url, String webhookUrl, DQueryRequestWebhook queryRequestWebhook) throws HttpStatusException, UnsuccessfulScrapeException {
         SteamProfileDto steamProfile = findSteamProfile(url);
-        ProductTrackingDto tracking = trackingService.generateNewTracking(url, WebsiteName.Steam, TrackingAction.STEAM_FIND_PROFILE);
+        String trackerId = productTrackerService.trackNewProduct(url, WebsiteName.Steam, TrackerAction.STEAM_FIND_PROFILE, webhookUrl, queryRequestWebhook);
+
+        try {
+            productTrackerScheduler.scheduleTracker(trackerId, true);
+        } catch (TrackingAlreadyScheduledException e) {
+            throw new RuntimeException("Inconsistency, Created Tracker with id " + trackerId + " but it's already defined in the in-memory scheduler");
+        }
 
         return new SteamProfileTracked()
                 .item(steamProfile)
-                .track(tracking);
+                .track(new TrackerInfoDto().trackerId(trackerId));
     }
 
     @Override

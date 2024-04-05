@@ -2,9 +2,8 @@ package com.paperized.shopapi.scraper.impl;
 
 import com.paperized.generated.shopapi.model.TcgProductDto;
 import com.paperized.shopapi.config.ScraperSettings;
-import com.paperized.shopapi.dto.WebsiteSetting;
 import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;
-import com.paperized.shopapi.model.TrackingAction;
+import com.paperized.shopapi.model.TrackerAction;
 import com.paperized.shopapi.model.WebsiteName;
 import com.paperized.shopapi.scraper.ScrapeExecutor;
 import com.paperized.shopapi.scraper.ScraperHttpService;
@@ -16,8 +15,6 @@ import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -40,10 +37,10 @@ public class TcgStoreScraperImpl extends ScrapeExecutor implements TcgStoreScrap
             throw new NullPointerException("Find Summary Products url not found");
         }
 
-        return executeScrapeAction(TrackingAction.TCGSTORE_ALL_SUMMARY_PRODUCTS, url);
+        return executeScrapeAction(TrackerAction.TCGSTORE_ALL_SUMMARY_PRODUCTS, url);
     }
 
-    @ScrapeAction(action = TrackingAction.TCGSTORE_ALL_SUMMARY_PRODUCTS, retryTimes = 1, intervalRetry = 2000)
+    @ScrapeAction(action = TrackerAction.TCGSTORE_ALL_SUMMARY_PRODUCTS, retryTimes = 1, intervalRetry = 2000)
     protected List<TcgProductDto> findSummaryAllProductsInternal(String url) throws HttpStatusException, UnsuccessfulScrapeException {
         int currPage = -1;
         int nextPage = 1;
@@ -82,10 +79,10 @@ public class TcgStoreScraperImpl extends ScrapeExecutor implements TcgStoreScrap
             throw new NullPointerException("Find Summary Products url not found");
         }
 
-        return executeScrapeAction(TrackingAction.TCGSTORE_SUMMARY_PRODUCTS, url);
+        return executeScrapeAction(TrackerAction.TCGSTORE_SUMMARY_PRODUCTS, url);
     }
 
-    @ScrapeAction(action = TrackingAction.TCGSTORE_SUMMARY_PRODUCTS, retryTimes = 1, intervalRetry = 2000)
+    @ScrapeAction(action = TrackerAction.TCGSTORE_SUMMARY_PRODUCTS, retryTimes = 1, intervalRetry = 2000)
     protected List<TcgProductDto> findSummaryProductsInternal(String url) throws HttpStatusException, UnsuccessfulScrapeException {
         List<TcgProductDto> tcgProductsDto = new ArrayList<>();
         Document page = scraperHttpService.getPage(url, websiteSetting);
