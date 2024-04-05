@@ -23,12 +23,17 @@ public class SteamServiceImpl implements SteamService {
     }
 
     @Override
-    public SteamProfileTracked findSteamProfile(String url) throws HttpStatusException, UnsuccessfulScrapeException {
-        SteamProfileDto steamProfile = steamScraper.findSteamProfile(url);
+    public SteamProfileTracked findSteamProfileTracked(String url) throws HttpStatusException, UnsuccessfulScrapeException {
+        SteamProfileDto steamProfile = findSteamProfile(url);
         ProductTrackingDto tracking = trackingService.generateNewTracking(url, WebsiteName.Steam, TrackingAction.STEAM_FIND_PROFILE);
 
         return new SteamProfileTracked()
                 .item(steamProfile)
                 .track(tracking);
+    }
+
+    @Override
+    public SteamProfileDto findSteamProfile(String url) throws HttpStatusException, UnsuccessfulScrapeException {
+        return steamScraper.findSteamProfile(url);
     }
 }

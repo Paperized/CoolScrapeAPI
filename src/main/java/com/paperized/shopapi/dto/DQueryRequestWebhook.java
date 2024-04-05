@@ -16,6 +16,7 @@ public class DQueryRequestWebhook implements Serializable {
     private DSort sort;
     private DPick pick;
     private boolean onlyIfDifferent;
+    private boolean sendOnlyDifferences;
 
     //TODO: use onlyIfDifferent to calculate the diff and send back only if different from previous scrape
     public <T extends DQueriable> void filterQueriables(List<T> queriables) {

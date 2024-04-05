@@ -8,8 +8,6 @@ import java.util.List;
 
 public interface TcgStoreScraper {
     List<TcgProductDto> findSummaryProducts(int page) throws HttpStatusException, UnsuccessfulScrapeException;
-
-    String getSummaryProductsUrl(int page);
-
     List<TcgProductDto> findSummaryAllProducts() throws HttpStatusException, UnsuccessfulScrapeException;
+    String getSummaryProductsUrl(Integer page);
 }

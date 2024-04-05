@@ -1,6 +1,7 @@
 package com.paperized.shopapi.controller;
 
 import com.paperized.generated.shopapi.api.SteamApi;
+import com.paperized.generated.shopapi.model.SteamProfileDto;
 import com.paperized.generated.shopapi.model.SteamProfileTracked;
 import com.paperized.shopapi.service.SteamService;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,12 @@ public class SteamController implements SteamApi {
     }
 
     @Override
-    public ResponseEntity<SteamProfileTracked> findSteamProfile(String url) throws Exception {
+    public ResponseEntity<SteamProfileDto> findSteamProfile(String url) throws Exception {
         return ResponseEntity.ok(steamService.findSteamProfile(url));
+    }
+
+    @Override
+    public ResponseEntity<SteamProfileTracked> findSteamProfileTrack(String url, String webhookUrl, Boolean sendOnlyDifferences) throws Exception {
+        return ResponseEntity.ok(steamService.findSteamProfileTracked(url));
     }
 }

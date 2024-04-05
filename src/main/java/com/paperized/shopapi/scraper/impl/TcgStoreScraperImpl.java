@@ -142,7 +142,7 @@ public class TcgStoreScraperImpl extends ScrapeExecutor implements TcgStoreScrap
     }
 
     @Override
-    public String getSummaryProductsUrl(int page) {
+    public String getSummaryProductsUrl(Integer page) {
         String url = websiteSetting.getCustomProperties().getOrDefault("find-summary-products", null);
         if(url != null) {
             if(page < 1) page = 1;

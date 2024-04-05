@@ -11,7 +11,33 @@ paths:
       tags:
         - tcg-store
       operationId: findSummaryProducts
-      x-scrape-api: array
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pageNum:
+                  type: integer
+                query:
+                  type: dquery
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TcgProductDto'
+  /tcg-store/find-summary-products/track:
+    post:
+      tags:
+        - tcg-store
+      operationId: findSummaryProductsTrack
+      parameters:
+        - $ref: '#/components/parameters/WebhookUrl'
+        - $ref: '#/components/parameters/NotifyOnlyIfDifferent'
+        - $ref: '#/components/parameters/NotifySendOnlyDifferences'
       requestBody:
         content:
           application/json:
@@ -29,6 +55,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TcgProductsTracked'
+
   /amazon/find-product-details:
     post:
       tags:
@@ -36,13 +63,42 @@ paths:
       summary: Find amazon product details
       description: Find amazon product details
       operationId: findProductDetails
-      x-scrape-api: object
       parameters:
         - in: query
-          name: url
           required: true
+          name: url
           schema:
             type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AmazonProductDto'
+  /amazon/find-product-details/track:
+    post:
+      tags:
+        - amazon
+      summary: Find amazon product details
+      description: Find amazon product details
+      operationId: findProductDetailsTrack
+      parameters:
+        - in: query
+          required: true
+          name: url
+          schema:
+            type: string
+        - $ref: '#/components/parameters/WebhookUrl'
+        - $ref: '#/components/parameters/NotifySendOnlyDifferences'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: dquery
       responses:
         '200':
           description: Successful operation
@@ -50,6 +106,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AmazonProductTracked'
+
   /steam/profile:
     post:
       tags:
@@ -57,11 +114,10 @@ paths:
       summary: Find steam profile info
       description: Find steam profile info
       operationId: findSteamProfile
-      x-scrape-api: object
       parameters:
         - in: query
-          name: url
           required: true
+          name: url
           schema:
             type: string
       responses:
@@ -70,29 +126,30 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SteamProfileTracked'
-  /tracking/{trackingId}/listen:
+                $ref: '#/components/schemas/SteamProfileDto'
+  /steam/profile/track:
     post:
       tags:
-        - tracking
-      summary: Register a webhook for this tracking id
-      description: Register a webhook for this tracking id
-      operationId: listenTrackingWebhook
+        - Steam
+      summary: Find steam profile info
+      description: Find steam profile info
+      operationId: findSteamProfileTrack
       parameters:
-        - in: path
-          name: trackingId
+        - in: query
           required: true
+          name: url
           schema:
             type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RegisterWebhookRequest'
+        - $ref: '#/components/parameters/WebhookUrl'
+        - $ref: '#/components/parameters/NotifySendOnlyDifferences'
       responses:
         '200':
-          description: OK
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SteamProfileTracked'
+
   /tracking/{trackingId}/unlisten:
     delete:
       tags:
@@ -106,7 +163,6 @@ paths:
           required: true
           schema:
             type: string
-
       responses:
         '200':
           description: OK
@@ -141,7 +197,7 @@ components:
     SteamProfileDto:
       type: object
       x-dqueriable:
-        id-composition: [name]
+        id-composition: [ name ]
       properties:
         name:
           type: string
@@ -153,7 +209,7 @@ components:
     TcgProductDto:
       type: object
       x-dqueriable:
-        id-composition: [url]
+        id-composition: [ url ]
       properties:
         name:
           type: string
@@ -175,7 +231,7 @@ components:
     AmazonProductDto:
       type: object
       x-dqueriable:
-        id-composition: [name]
+        id-composition: [ name ]
       properties:
         name:
           type: string
@@ -196,21 +252,29 @@ components:
           format: double
           description: suggested price of product
 
-    RegisterWebhookRequest:
-      type: object
-      required:
-        - url
-      properties:
-        url:
-          type: string
-        query:
-          type: dquerynodeT
-
     ProductTrackingDto:
       type: object
       properties:
         trackingId:
           type: string
-        webhookRegisterExpiresAt:
-          type: string
-          format: date-time
+
+  parameters:
+    WebhookUrl:
+      in: query
+      required: true
+      name: webhookUrl
+      schema:
+        type: string
+    NotifyOnlyIfDifferent:
+      in: query
+      required: false
+      name: onlyIfDifferent
+      schema:
+        type: boolean
+    NotifySendOnlyDifferences:
+      in: query
+      required: false
+      name: sendOnlyDifferences
+      schema:
+        type: boolean
+

@@ -2,10 +2,13 @@ package com.paperized.shopapi.controller;
 
 import com.paperized.generated.shopapi.api.TcgStoreApi;
 import com.paperized.generated.shopapi.model.FindSummaryProductsRequest;
+import com.paperized.generated.shopapi.model.TcgProductDto;
 import com.paperized.generated.shopapi.model.TcgProductsTracked;
 import com.paperized.shopapi.service.TcgStoreService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 public class TcgStoreController implements TcgStoreApi {
@@ -16,19 +19,19 @@ public class TcgStoreController implements TcgStoreApi {
     }
 
     @Override
-    public ResponseEntity<TcgProductsTracked> findSummaryProducts(FindSummaryProductsRequest body) throws Exception {
-        TcgProductsTracked trackableResult;
+    public ResponseEntity<TcgProductsTracked> findSummaryProductsTrack(String webhookUrl, Boolean onlyIfDifferent, Boolean sendOnlyDifferences, FindSummaryProductsRequest findSummaryProductsRequest) throws Exception {
+        TcgProductsTracked trackableResult = tcgStoreService.findSummaryProductsTracked(findSummaryProductsRequest.getPageNum());
 
-        if(body != null && body.getPageNum() != null) {
-            trackableResult = tcgStoreService.findSummaryProducts(body.getPageNum());
-        } else {
-            trackableResult = tcgStoreService.findSummaryAllProducts();
-        }
-
-        if(body != null && body.getQuery() != null) {
-            body.getQuery().filterQueriables(trackableResult.getItems());
+        // Ignore onlyIfDifferent and sendOnlyDifferences for this return, will be checked in the schedule
+        if(findSummaryProductsRequest.getQuery() != null) {
+            findSummaryProductsRequest.getQuery().filterQueriables(trackableResult.getItems());
         }
 
         return ResponseEntity.ok(trackableResult);
+    }
+
+    @Override
+    public ResponseEntity<List<TcgProductDto>> findSummaryProducts(FindSummaryProductsRequest findSummaryProductsRequest) throws Exception {
+        return ResponseEntity.ok(tcgStoreService.findSummaryProducts(findSummaryProductsRequest.getPageNum()));
     }
 }

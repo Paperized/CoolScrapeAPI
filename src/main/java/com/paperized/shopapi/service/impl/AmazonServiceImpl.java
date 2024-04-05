@@ -23,12 +23,17 @@ public class AmazonServiceImpl implements AmazonService {
     }
 
     @Override
-    public AmazonProductTracked findProductDetails(String url) throws HttpStatusException, UnsuccessfulScrapeException {
-        AmazonProductDto amazonProduct = amazonScraper.findProductDetails(url);
+    public AmazonProductTracked findProductDetailsTracked(String url) throws HttpStatusException, UnsuccessfulScrapeException {
+        AmazonProductDto amazonProduct = findProductDetails(url);
         ProductTrackingDto tracking = trackingService.generateNewTracking(url, WebsiteName.Amazon, TrackingAction.AMAZON_PRODUCT_DETAILS);
 
         return new AmazonProductTracked()
                 .item(amazonProduct)
                 .track(tracking);
+    }
+
+    @Override
+    public AmazonProductDto findProductDetails(String url) throws HttpStatusException, UnsuccessfulScrapeException {
+        return amazonScraper.findProductDetails(url);
     }
 }

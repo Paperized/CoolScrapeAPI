@@ -25,9 +25,10 @@ public class TcgStoreServiceImpl implements TcgStoreService {
     }
 
     @Override
-    public TcgProductsTracked findSummaryProducts(int page) throws HttpStatusException, UnsuccessfulScrapeException {
-        List<TcgProductDto> tcgProductsDto = tcgStoreScraper.findSummaryProducts(page);
-        ProductTrackingDto tracking = trackingService.generateNewTracking(tcgStoreScraper.getSummaryProductsUrl(page), WebsiteName.TcgStore, TrackingAction.TCGSTORE_SUMMARY_PRODUCTS);
+    public TcgProductsTracked findSummaryProductsTracked(Integer page) throws HttpStatusException, UnsuccessfulScrapeException {
+        List<TcgProductDto> tcgProductsDto = findSummaryProducts(page);
+        TrackingAction trackingAction = page != null ? TrackingAction.TCGSTORE_SUMMARY_PRODUCTS : TrackingAction.TCGSTORE_ALL_SUMMARY_PRODUCTS;
+        ProductTrackingDto tracking = trackingService.generateNewTracking(tcgStoreScraper.getSummaryProductsUrl(page), WebsiteName.TcgStore, trackingAction);
 
         return new TcgProductsTracked()
                 .items(tcgProductsDto)
@@ -35,12 +36,7 @@ public class TcgStoreServiceImpl implements TcgStoreService {
     }
 
     @Override
-    public TcgProductsTracked findSummaryAllProducts() throws HttpStatusException, UnsuccessfulScrapeException {
-        List<TcgProductDto> tcgProductsDto = tcgStoreScraper.findSummaryAllProducts();
-        ProductTrackingDto tracking = trackingService.generateNewTracking(tcgStoreScraper.getSummaryProductsUrl(1), WebsiteName.TcgStore, TrackingAction.TCGSTORE_ALL_SUMMARY_PRODUCTS);
-
-        return new TcgProductsTracked()
-                .items(tcgProductsDto)
-                .track(tracking);
+    public List<TcgProductDto> findSummaryProducts(Integer page) throws HttpStatusException, UnsuccessfulScrapeException {
+        return page != null ? tcgStoreScraper.findSummaryProducts(page) : tcgStoreScraper.findSummaryAllProducts();
     }
 }
