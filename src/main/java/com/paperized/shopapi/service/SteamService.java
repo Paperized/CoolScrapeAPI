@@ -2,7 +2,7 @@ package com.paperized.shopapi.service;
 
 import com.paperized.generated.shopapi.model.SteamProfileDto;
 import com.paperized.generated.shopapi.model.SteamProfileTracked;
-import com.paperized.shopapi.dto.DQueryRequestWebhook;
+import com.paperized.shopapi.model.webhookfilter.DQueryRequestWebhook;
 import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;
 import org.jsoup.HttpStatusException;
 

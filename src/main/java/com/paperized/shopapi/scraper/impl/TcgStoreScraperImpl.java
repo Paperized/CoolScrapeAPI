@@ -55,6 +55,7 @@ public class TcgStoreScraperImpl extends ScrapeExecutor implements TcgStoreScrap
             Elements boxes = page.selectXpath("//*[contains(@class, 'product-small box')]");
             for(Element el : boxes) {
                 TcgProductDto currDto = extractSummaryProductDto(el);
+                currDto.calculateAndSetUniqueIdentifier();
                 tcgProductsDto.add(currDto);
             }
 
@@ -91,6 +92,7 @@ public class TcgStoreScraperImpl extends ScrapeExecutor implements TcgStoreScrap
         Elements boxes = page.selectXpath("//*[contains(@class, 'product-small box')]");
         for(Element el : boxes) {
             TcgProductDto currDto = extractSummaryProductDto(el);
+            currDto.calculateAndSetUniqueIdentifier();
             tcgProductsDto.add(currDto);
         }
 

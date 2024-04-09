@@ -3,14 +3,17 @@ package com.paperized.shopapi.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.paperized.shopapi.dquery.DQueriable;
 import com.paperized.shopapi.dto.WebhookScrapeInput;
+import com.paperized.shopapi.exceptions.NoDataException;
 import com.paperized.shopapi.exceptions.TrackingAlreadyScheduledException;
 import com.paperized.shopapi.exceptions.TrackingExpiredException;
 import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;
 import com.paperized.shopapi.model.ProductTracker;
 import com.paperized.shopapi.model.ProductTrackerDetails;
+import com.paperized.shopapi.model.webhookfilter.DOnChangeMode;
+import com.paperized.shopapi.model.webhookfilter.DOnChangeSaveMode;
+import com.paperized.shopapi.model.webhookfilter.DOnChanges;
 import com.paperized.shopapi.repository.ProductTrackerRepository;
 import com.paperized.shopapi.repository.ProductTrackerDetailsRepository;
-import com.paperized.shopapi.scraper.ScrapeExecutor;
 import com.paperized.shopapi.service.ProductTrackerScheduler;
 import com.paperized.shopapi.service.ScrapingActionService;
 import com.paperized.shopapi.utils.AppUtils;
@@ -21,16 +24,14 @@ import org.jsoup.HttpStatusException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
@@ -64,7 +65,7 @@ public class ProductTrackerSchedulerImpl implements ProductTrackerScheduler {
 
             // Restart each schedule after 1 minute after the startup
             ScheduledFuture<?> scheduledFuture = taskScheduler.scheduleWithFixedDelay(runnable,
-                    Instant.now().plusSeconds(60),
+                    Instant.now().plusSeconds(5),
                     Duration.ofMillis(tracking.getIntervalDuration()));
 
             currentScheduledProductTracking.put(tracking.getId(), scheduledFuture);
@@ -82,7 +83,7 @@ public class ProductTrackerSchedulerImpl implements ProductTrackerScheduler {
         ProductTracker productTracker = productTrackerRepository.findById(trackerId)
                 .orElseThrow(() -> new EntityNotFoundException(format("Schedule requested but the Tracking id: %s no longed exists!", trackerId)));
 
-        if(force && alreadyScheduled) {
+        if (force && alreadyScheduled) {
             ScheduledFuture<?> scheduledFuture = currentScheduledProductTracking.remove(trackerId);
             scheduledFuture.cancel(false);
             log.info("Unregistered tracking webhook because of force schedule with id : {}!", trackerId);
@@ -143,66 +144,126 @@ public class ProductTrackerSchedulerImpl implements ProductTrackerScheduler {
                     log.info("Filtered scheduled scraped list with tracking id: {}", trackerId);
                 }
 
-                // registeredTracking.getFilters().isOnlyIfDifferent()
-                // registeredTracking.getLastScrapedDataAs(tracking.getAction()) -> LAST_DATA
-                // check flag isOnlyIfDifferent and if LAST_DATA != scrapedResult
-                // if single -> .equals | if multiple -> check if there is any change in entries between last data and current, for each item check the UniqueIdentifier and check the corrisponding item in the other list
+                if ((!returnsList && scrapedResult == null) || (returnsList && CollectionUtils.isEmpty((List<? extends DQueriable>) scrapedResult))) {
+                    throw new NoDataException("Scraper did not find any content!");
+                }
+
                 Object prevData = registeredTracking.getLastScrapedDataAs(tracking.getAction());
-                boolean prevDataChanged = false;
+                Object dataChanged = scrapedResult;
+                Object allData = scrapedResult;
 
-                if (hasFilters && registeredTracking.getFilters().isOnlyIfDifferent()) {
-                    if (prevData != null) {
-                        if (returnsList) {
-                            List<? extends DQueriable> convertedPrevData = (List<? extends DQueriable>) prevData;
-                            List<? extends DQueriable> scrapedList = (List<? extends DQueriable>) scrapedResult;
+                DOnChangeMode sendMode = DOnChangeMode.SEND_ALL_ONLY_IF_DIFF;
+                DOnChangeSaveMode saveMode = DOnChangeSaveMode.SAVE_LAST;
 
-                            if (scrapedList == null ^ convertedPrevData == null) {
-                                log.info("One of the two lists are empty/null!");
-                                prevDataChanged = true;
-                            } else if (convertedPrevData.size() != scrapedList.size()) {
-                                log.info("Lists have different sizes!");
-                                prevDataChanged = true;
-                            } else {
-                                boolean sameList = scrapedList.stream().allMatch(curr -> {
-                                    DQueriable other = convertedPrevData.stream()
-                                            .filter(x -> org.apache.commons.lang3.StringUtils.equals(x.getUniqueIdentifier(), curr.getUniqueIdentifier()))
-                                            .findFirst().orElse(null);
+                if (hasFilters && registeredTracking.getFilters().getPreviousDataChecks() != null) {
+                    DOnChanges checks = registeredTracking.getFilters().getPreviousDataChecks();
+                    saveMode = checks.getSaveMode();
+                    sendMode = checks.getMode();
 
-                                    return other != null && other.equals(curr);
-                                });
+                    ChangedData differences = checkQueriablesDifferences(returnsList, prevData, scrapedResult, checks.getPropertiesToCheck());
 
-                                prevDataChanged = !sameList;
-                            }
-
-                        } else {
-                            prevDataChanged = scrapedResult.equals(prevData);
-                        }
-
-                        if (!prevDataChanged) {
-                            log.info("Previous data was equal to the current one scraped, webhook will not be called due to filters!");
-                            return;
-                        }
-
-                    } else {
-                        prevDataChanged = true;
+                    if (!differences.hasChanges) {
+                        log.info("Previous data was equal to the current one scraped, webhook will not be called due to filters!");
+                        return;
                     }
+
+                    dataChanged = differences.changedData;
+                    allData = differences.allData;
                 }
 
-                if (prevDataChanged) {
-                    registeredTracking.setLastScrapedDataJson(AppUtils.toJson(scrapedResult));
+                Object dataToSave = DOnChangeSaveMode.SAVE_ALL.equals(saveMode) ? allData : dataChanged;
+                if (dataToSave != null) {
+                    registeredTracking.setLastScrapedDataJson(AppUtils.toJson(dataToSave));
                     productTrackerDetailsRepository.save(registeredTracking);
+
+                    String resultTest = AppUtils.toJson(scrapedResult);
+                    log.info(resultTest);
                 }
 
-                String resultTest = AppUtils.toJson(scrapedResult);
-                log.info(resultTest);
-
-                makeWebhookRequest(trackerId, registeredTracking.getWebhookUrl(), scrapedResult);
+                Object dataToSend = DOnChangeMode.SEND_ALL_ONLY_IF_DIFF.equals(sendMode) ? allData : dataChanged;
+                makeWebhookRequest(trackerId, registeredTracking.getWebhookUrl(), dataToSend);
             } catch (HttpStatusException | UnsuccessfulScrapeException e) {
                 log.error(e.getMessage());
             } catch (JsonProcessingException e) {
                 log.error("Logging test result failed: {}", e.getMessage());
             }
         };
+    }
+
+    private ChangedData checkQueriablesDifferences(boolean returnsList, Object prevData, Object scrapedResult, List<String> propertiesToCheck) {
+        boolean prevDataChanged;
+        Object changedData = null;
+        Object allData = null;
+
+        if (prevData != null) {
+            if (returnsList) {
+                List<? extends DQueriable> convertedPrevData = (List<? extends DQueriable>) prevData;
+                List<? extends DQueriable> scrapedList = (List<? extends DQueriable>) scrapedResult;
+
+                if (CollectionUtils.isEmpty(scrapedList)) {
+                    throw new NoDataException("No data scraped, not sending any webhook");
+                }
+
+                if (CollectionUtils.isEmpty(convertedPrevData)) {
+                    log.info("One of the two lists are empty/null!");
+                    prevDataChanged = true;
+                    changedData = scrapedResult;
+                    allData = scrapedList;
+                } else {
+                    ChangedData merge = mergeTwoQueriables(convertedPrevData, scrapedList, propertiesToCheck);
+                    prevDataChanged = merge.hasChanges;
+                    changedData = merge.changedData;
+                    allData = merge.allData;
+                }
+            } else {
+                prevDataChanged = !scrapedResult.equals(prevData);
+                changedData = scrapedResult;
+                allData = scrapedResult;
+            }
+        } else {
+            prevDataChanged = true;
+            changedData = scrapedResult;
+            allData = scrapedResult;
+        }
+
+        return new ChangedData(prevDataChanged, changedData, allData);
+    }
+
+    private ChangedData mergeTwoQueriables(List<? extends DQueriable> lPrio, List<? extends DQueriable> hPrio, List<String> propertiesToCheck) {
+        boolean hasChanged = false;
+        List<DQueriable> changes = new ArrayList<>();
+        List<DQueriable> allData = new ArrayList<>(hPrio);
+
+        for (DQueriable l : lPrio) {
+            Optional<? extends DQueriable> found = hPrio.stream().filter(x -> x.getUniqueIdentifier().equals(l.getUniqueIdentifier())).findFirst();
+            if (found.isEmpty()) {
+                changes.add(l);
+                allData.add(l);
+                continue;
+            }
+
+            DQueriable obj = found.get();
+            if (CollectionUtils.isEmpty(propertiesToCheck)) {
+                if (!obj.equals(l)) {
+                    changes.add(obj);
+                    hasChanged = true;
+                }
+            } else {
+                boolean currHasChanged;
+
+                for(String prop : propertiesToCheck) {
+                    currHasChanged = !Objects.equals(obj.getVariableValue(prop), l.getVariableValue(prop));
+                    if(currHasChanged) {
+                        changes.add(obj);
+                        hasChanged = true;
+                        break;
+                    }
+                }
+            }
+
+        }
+
+        return new ChangedData(hasChanged, changes, allData);
     }
 
     private void makeWebhookRequest(String trackerId, String webhook, Object body) {
@@ -215,5 +276,9 @@ public class ProductTrackerSchedulerImpl implements ProductTrackerScheduler {
             log.info("Failed to send scraped result via webhook (trackingId: {}, webhookUrl: {}, message: {})",
                     trackerId, webhook, ex.getMessage());
         }
+    }
+
+
+    private record ChangedData(boolean hasChanges, Object changedData, Object allData) {
     }
 }

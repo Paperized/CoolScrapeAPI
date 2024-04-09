@@ -106,9 +106,18 @@ public class {{classname}}{{#parent}} extends {{{parent}}}{{/parent}}{{^parent}}
 
     @Schema(name = "__uniqueId", description = "Unique id", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @JsonProperty("__uniqueId")
+    private String __uniqueId;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @Override
     public String getUniqueIdentifier() {
-        return String.format("{{classname}}{{#vendorExtensions.x-dqueriable.id-composition}}_%s{{/vendorExtensions.x-dqueriable.id-composition}}"{{#vendorExtensions.x-dqueriable.id-composition}}, {{.}}{{/vendorExtensions.x-dqueriable.id-composition}});
+        return __uniqueId == null ? calculateAndSetUniqueIdentifier() : __uniqueId;
+    }
+
+    @Override
+    public String calculateAndSetUniqueIdentifier() {
+        __uniqueId = String.format("{{classname}}{{#vendorExtensions.x-dqueriable.id-composition}}_%s{{/vendorExtensions.x-dqueriable.id-composition}}"{{#vendorExtensions.x-dqueriable.id-composition}}, {{.}}{{/vendorExtensions.x-dqueriable.id-composition}});
+        return __uniqueId;
     }
 
   {{/vendorExtensions.x-dqueriable}}

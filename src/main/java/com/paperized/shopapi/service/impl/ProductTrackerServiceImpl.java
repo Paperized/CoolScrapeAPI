@@ -1,6 +1,6 @@
 package com.paperized.shopapi.service.impl;
 
-import com.paperized.shopapi.dto.DQueryRequestWebhook;
+import com.paperized.shopapi.model.webhookfilter.DQueryRequestWebhook;
 import com.paperized.shopapi.model.ProductTracker;
 import com.paperized.shopapi.model.ProductTrackerDetails;
 import com.paperized.shopapi.model.TrackerAction;

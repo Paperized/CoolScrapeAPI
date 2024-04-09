@@ -1,4 +1,4 @@
-package com.paperized.shopapi.dto;
+package com.paperized.shopapi.model.webhookfilter;
 
 import com.paperized.shopapi.dquery.DQueryRequest;
 import lombok.Data;
@@ -13,14 +13,11 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Data
 public class DQueryRequestWebhook extends DQueryRequest implements Serializable {
-    private boolean onlyIfDifferent;
-    private boolean sendOnlyDifferences;
+    private DOnChanges previousDataChecks;
 
     public DQueryRequestWebhook(DQueryRequest queryRequest) {
         setQuery(queryRequest.getQuery());
         setSort(queryRequest.getSort());
         setPick(queryRequest.getPick());
     }
-
-    //TODO: use onlyIfDifferent to calculate the diff and send back only if different from previous scrape
 }

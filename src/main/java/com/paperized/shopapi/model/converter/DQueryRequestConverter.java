@@ -2,8 +2,7 @@ package com.paperized.shopapi.model.converter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.paperized.shopapi.dquery.DQueryRequest;
-import com.paperized.shopapi.dto.DQueryRequestWebhook;
+import com.paperized.shopapi.model.webhookfilter.DQueryRequestWebhook;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import org.slf4j.Logger;

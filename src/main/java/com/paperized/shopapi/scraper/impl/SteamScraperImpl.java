@@ -31,25 +31,27 @@ public class SteamScraperImpl extends ScrapeExecutor implements SteamScraper {
 
     @ScrapeAction(action = TrackerAction.STEAM_FIND_PROFILE, retryTimes = 1, intervalRetry = 1000)
     private SteamProfileDto findSteamProfileInternal(String url) throws HttpStatusException, UnsuccessfulScrapeException {
-        if(!url.startsWith(websiteSetting.getBaseUrl())) {
+        if (!url.startsWith(websiteSetting.getBaseUrl())) {
             throw new UnsuccessfulScrapeException("Url is not a steam recognized url!");
         }
 
         Document page = scraperHttpService.getPage(url, websiteSetting);
 
         String steamName = ScraperUtils.getText(page.selectXpath("//*[starts-with(@class, 'profile_header_centered_persona')]//*[@class='actual_persona_name']").first());
-        if(StringUtils.isBlank(steamName)) {
+        if (StringUtils.isBlank(steamName)) {
             throw new UnsuccessfulScrapeException("Steam url profile provided is not a valid user profile!");
         }
 
         String status = ScraperUtils.getText(page.selectXpath("//*[@class='profile_in_game_header']").first());
-        boolean isOnline = !"Offline".equalsIgnoreCase(status);
+        boolean isOnline = !org.apache.commons.lang3.StringUtils.containsIgnoreCase(status, "Offline");
 
         String playingAt = ScraperUtils.getText(page.selectXpath("//*[@class='profile_in_game_name']").first());
 
-        return new SteamProfileDto()
-                .name(steamName)
-                .online(isOnline)
-                .playingAt(playingAt);
+        SteamProfileDto result = new SteamProfileDto()
+                                        .name(steamName)
+                                        .online(isOnline)
+                                        .playingAt(playingAt);
+        result.calculateAndSetUniqueIdentifier();
+        return result;
     }
 }

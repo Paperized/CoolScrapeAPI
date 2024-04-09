@@ -1,7 +1,7 @@
 package com.paperized.shopapi.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.paperized.shopapi.dto.DQueryRequestWebhook;
+import com.paperized.shopapi.model.webhookfilter.DQueryRequestWebhook;
 import com.paperized.shopapi.model.converter.DQueryRequestConverter;
 import com.paperized.shopapi.utils.AppUtils;
 import jakarta.persistence.*;

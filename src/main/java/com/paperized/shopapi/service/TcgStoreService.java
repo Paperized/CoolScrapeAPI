@@ -3,7 +3,7 @@ package com.paperized.shopapi.service;
 import com.paperized.generated.shopapi.model.TcgProductDto;
 import com.paperized.generated.shopapi.model.TcgProductsTracked;
 import com.paperized.shopapi.dquery.DQueryRequest;
-import com.paperized.shopapi.dto.DQueryRequestWebhook;
+import com.paperized.shopapi.model.webhookfilter.DQueryRequestWebhook;
 import com.paperized.shopapi.exceptions.UnsuccessfulScrapeException;
 import org.jsoup.HttpStatusException;
 

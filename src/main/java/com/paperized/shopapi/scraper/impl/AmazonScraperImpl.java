@@ -47,6 +47,7 @@ public class AmazonScraperImpl extends ScrapeExecutor implements AmazonScraper {
             throw new UnsuccessfulScrapeException("Page loaded but unable to scrape data from url: " + url);
         }
 
+        amazonProduct.calculateAndSetUniqueIdentifier();
         return amazonProduct;
     }
 

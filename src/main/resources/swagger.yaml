@@ -36,8 +36,9 @@ paths:
       operationId: findSummaryProductsTrack
       parameters:
         - $ref: '#/components/parameters/WebhookUrl'
-        - $ref: '#/components/parameters/NotifyOnlyIfDifferent'
-        - $ref: '#/components/parameters/NotifySendOnlyDifferences'
+        - $ref: '#/components/parameters/CheckMode'
+        - $ref: '#/components/parameters/SaveMode'
+        - $ref: '#/components/parameters/PropertiesToCheck'
       requestBody:
         content:
           application/json:
@@ -90,7 +91,9 @@ paths:
           schema:
             type: string
         - $ref: '#/components/parameters/WebhookUrl'
-        - $ref: '#/components/parameters/NotifyOnlyIfDifferent'
+        - $ref: '#/components/parameters/CheckMode'
+        - $ref: '#/components/parameters/SaveMode'
+        - $ref: '#/components/parameters/PropertiesToCheck'
       requestBody:
         content:
           application/json:
@@ -138,7 +141,9 @@ paths:
           schema:
             type: string
         - $ref: '#/components/parameters/WebhookUrl'
-        - $ref: '#/components/parameters/NotifyOnlyIfDifferent'
+        - $ref: '#/components/parameters/CheckMode'
+        - $ref: '#/components/parameters/SaveMode'
+        - $ref: '#/components/parameters/PropertiesToCheck'
       responses:
         '200':
           description: Successful operation
@@ -262,18 +267,23 @@ components:
       name: webhookUrl
       schema:
         type: string
-    NotifyOnlyIfDifferent:
+    CheckMode:
       in: query
       required: false
-      name: onlyIfDifferent
+      name: checkMode
       schema:
-        type: boolean
-        default: false
-    NotifySendOnlyDifferences:
+        type: dcheckmode
+    SaveMode:
       in: query
       required: false
-      name: sendOnlyDifferences
+      name: saveMode
       schema:
-        type: boolean
-        default: false
+        type: dsavemode
+    PropertiesToCheck:
+      in: query
+      required: false
+      name: propertiesToCheck
+      schema:
+        items:
+          type: string
 
