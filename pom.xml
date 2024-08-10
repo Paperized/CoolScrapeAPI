@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.paperized</groupId>
-	<artifactId>shopapi</artifactId>
+	<artifactId>easynotifier</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>shopapi</name>
+	<name>easynotifier</name>
 	<description>api data</description>
 	<properties>
 		<java.version>21</java.version>
@@ -114,8 +114,8 @@
 								${project.basedir}/src/main/resources/swagger.yaml
 							</inputSpec>
 							<generatorName>spring</generatorName>
-							<apiPackage>com.paperized.generated.shopapi.api</apiPackage>
-							<modelPackage>com.paperized.generated.shopapi.model</modelPackage>
+							<apiPackage>com.paperized.generated.easynotifier.api</apiPackage>
+							<modelPackage>com.paperized.generated.easynotifier.model</modelPackage>
 							<supportingFilesToGenerate>
 								ApiUtil.java
 							</supportingFilesToGenerate>
@@ -128,9 +128,9 @@
 							<typeMappings>
 								<typeMapping>DateTime=java.time.LocalDateTime</typeMapping>
 								<typeMapping>Date=java.time.LocalDateTime</typeMapping>
-								<typeMapping>dquery=com.paperized.shopapi.dquery.DQueryRequest</typeMapping>
-								<typeMapping>dsavemode=com.paperized.shopapi.model.webhookfilter.DOnChangeSaveMode</typeMapping>
-								<typeMapping>dcheckmode=com.paperized.shopapi.model.webhookfilter.DOnChangeMode</typeMapping>
+								<typeMapping>dquery=com.paperized.easynotifier.dquery.DQueryRequest</typeMapping>
+								<typeMapping>dsavemode=com.paperized.easynotifier.model.webhookfilter.DOnChangeSaveMode</typeMapping>
+								<typeMapping>dcheckmode=com.paperized.easynotifier.model.webhookfilter.DOnChangeMode</typeMapping>
 							</typeMappings>
 						</configuration>
 					</execution>
