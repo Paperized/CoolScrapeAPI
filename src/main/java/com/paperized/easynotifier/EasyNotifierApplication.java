@@ -1,7 +1,7 @@
 package com.paperized.easynotifier;
 
 import com.paperized.generated.easynotifier.model.AmazonProductDto;
-import com.paperized.easynotifier.dquery.sort.DComparable;
+import com.paperized.easynotifier.dquery.sort.DComparator;
 import com.paperized.easynotifier.dquery.sort.DSort;
 import com.paperized.easynotifier.dquery.sort.SortPair;
 import org.slf4j.Logger;
@@ -47,7 +47,7 @@ public class EasyNotifierApplication implements CommandLineRunner {
                 .addSort("currentPrice", SortPair.SortDirection.ASC)
                 .addSort("suggestedPrice", SortPair.SortDirection.DESC);
 
-        dtos.sort(new DComparable(sort));
+        dtos.sort(new DComparator(sort));
 
         //logger.info("Dopo: {}", dtos);
     }

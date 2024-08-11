@@ -10,7 +10,7 @@ import static java.lang.String.format;
 
 @Data
 @AllArgsConstructor
-public class DComparable implements Comparator<DQueriable> {
+public class DComparator implements Comparator<DQueriable> {
     private DSort sortPairs;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -19,7 +19,7 @@ public class DComparable implements Comparator<DQueriable> {
         for (SortPair currPair : sortPairs) {
             DQueriable curr1 = o1;
             DQueriable curr2 = o2;
-            if (currPair.getDir() == null || currPair.getDir().equals(SortPair.SortDirection.DESC)) {
+            if (SortPair.SortDirection.DESC.equals(currPair.getDir())) {
                 DQueriable temp = curr1;
                 curr1 = curr2;
                 curr2 = temp;
@@ -55,7 +55,7 @@ public class DComparable implements Comparator<DQueriable> {
         return 0;
     }
 
-    public static DComparable fromDSort(DSort sort) {
-        return new DComparable(sort);
+    public static DComparator fromDSort(DSort sort) {
+        return new DComparator(sort);
     }
 }

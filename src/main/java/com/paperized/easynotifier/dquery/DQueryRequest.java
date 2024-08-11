@@ -1,7 +1,7 @@
 package com.paperized.easynotifier.dquery;
 
 import com.paperized.easynotifier.dquery.pick.DPick;
-import com.paperized.easynotifier.dquery.sort.DComparable;
+import com.paperized.easynotifier.dquery.sort.DComparator;
 import com.paperized.easynotifier.dquery.sort.DSort;
 import lombok.Data;
 
@@ -20,7 +20,7 @@ public class DQueryRequest implements Serializable {
         }
 
         if(sort != null) {
-            queriables.sort(new DComparable(sort));
+            queriables.sort(new DComparator(sort));
         }
 
         if(pick != null) {
