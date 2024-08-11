@@ -27,11 +27,14 @@ Originally envisioned as a core service for other backend applications, DataNoti
 2.  **Automatic DTO Generation**: The generator automatically creates Data Transfer Objects (DTOs), significantly reducing code boilerplate and minimizing manual effort required to define data structures.
     
 3.  **Customizable Code Generation**: The generator's flexibility allows for extensive customization. In this project, custom Mustache templates were added to extend the DTOs with additional methods. Specifically, the custom property `x-dqueriable` was used to introduce filter capabilities directly into the generated DTOs, facilitating complex query operations.
-    
+4.  ![image](https://github.com/user-attachments/assets/1f66d07c-3773-4eed-99e0-b46faef7dbe6)
+   
 
 ### Customization Details
 
 *   **Mustache Templates**: Custom Mustache files were employed to modify the default code generation process. These templates were tailored to enhance DTOs with methods that support advanced filtering, aligning with the project’s specific requirements.
+*   ![image](https://github.com/user-attachments/assets/13a63a34-963b-4393-99ac-ab39063b1e9e)
+
 
 By leveraging OpenAPI Generator, **DataNotifier** achieves a robust, maintainable architecture while streamlining the development process through automated code generation and customizable extensions.
 
