@@ -1,5 +1,5 @@
 # DataNotifier
-**DataNotifier** is a backend software designed to scrape supported web pages, retrieve data, and deliver it through various channels, including webhooks, sockets, or plain HTTP GET calls.
+**DataNotifier** is a backend software designed to scrape supported web pages, retrieve data, and deliver it through various channels, including webhooks, sockets, or plain HTTP GET calls. [how to add new scrape procedures](#how-to)
 
 ## Key Features
 - Scheduled Data Monitoring: The core functionality of DataNotifier revolves around a Scheduler that monitors specific data on web pages using a **trackingId**. This ID replicates the initial call, enabling the detection of any changes in the response. When a change is detected, DataNotifier promptly notifies the caller.
@@ -100,4 +100,169 @@ In **DQuery**, to create and evaluate filters:
 *   Implement the `DQueryCondition` interface for all nodes.
 *   Use `DQueryNode` to define and manage logical and comparison filters.
 *   Apply `DComparable`, `DSort`, and `DPick` to customize sorting and selection.
-*   Combine these components into a `DQueryRequest` for comprehensive querying capabilities.”
+*   Combine these components into a `DQueryRequest` for comprehensive querying capabilities.
+
+## HOW TO
+
+To integrate a new trackable scrappable data type into **DQuery**, follow these steps:
+
+### 1\. Create a New Endpoint
+
+Define a new endpoint in your Swagger API specification to handle the new data type. This endpoint should be designed to accept requests and return responses that include the data you want to scrape.
+```
+  /tcg-store/find-summary-products/track:
+    post:
+      tags:
+        - tcg-store
+      operationId: findSummaryProductsTrack
+      parameters:
+        - $ref: '#/components/parameters/WebhookUrl'
+        - $ref: '#/components/parameters/CheckMode'
+        - $ref: '#/components/parameters/SaveMode'
+        - $ref: '#/components/parameters/PropertiesToCheck'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pageNum:
+                  type: integer
+                query:
+                  type: dquery
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TcgProductsTracked'
+```
+
+### 2\. Define `x-queriable` Parameters
+
+In the Swagger specification for the endpoint, ensure that the returned object includes the `x-queriable` parameter for relevant fields. These parameters are used internally by the system to generate a unique key for each scrapped item. This unique key helps in tracking and managing the data efficiently.
+
+```
+    TcgProductsTracked:
+      type: object
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/TcgProductDto'
+        track:
+          $ref: '#/components/schemas/TrackerInfoDto'
+
+    TcgProductDto:
+      type: object
+      x-dqueriable:
+        id-composition: [ url ]
+      properties:
+        name:
+          type: string
+        img:
+          type: string
+        url:
+          type: string
+```
+
+
+### 3\. Implement the Controller
+
+Create a new Controller class that will handle incoming requests to the new endpoint. The Controller should be responsible for receiving requests, processing them, and delegating tasks to the service layer.
+```
+    @Override
+    public ResponseEntity<TcgProductsTracked> findSummaryProductsTrack(String webhookUrl, DOnChangeMode checkMode, DOnChangeSaveMode saveMode, List<String> propertiesToCheck, FindSummaryProductsRequest findSummaryProductsRequest) throws Exception {
+        DQueryRequestWebhook queryRequestWebhook = new DQueryRequestWebhook(findSummaryProductsRequest.getQuery());
+        queryRequestWebhook.setPreviousDataChecks(DOnChanges.builder()
+                .mode(checkMode)
+                .saveMode(saveMode)
+                .propertiesToCheck(propertiesToCheck)
+                .build());
+
+        return ResponseEntity.ok(tcgStoreService.findSummaryProductsTracked(findSummaryProductsRequest.getPageNum(), webhookUrl, queryRequestWebhook));
+    }
+```
+
+### 4\. Implement the Service
+
+Develop a Service class that contains the business logic for processing the data. The Service should interact with the data source, apply the necessary filters and transformations, and prepare the data for return to the client.
+```
+    @Override
+    public TcgProductsTracked findSummaryProductsTracked(Integer page, String webhookUrl, DQueryRequestWebhook queryRequestWebhook) throws HttpStatusException, UnsuccessfulScrapeException {
+        List<TcgProductDto> tcgProductsDto = findSummaryProducts(page, queryRequestWebhook);
+        TrackerAction trackerAction = page != null ? TrackerAction.TCGSTORE_SUMMARY_PRODUCTS : TrackerAction.TCGSTORE_ALL_SUMMARY_PRODUCTS;
+        String trackerId = productTrackerService.trackNewProduct(tcgStoreScraper.getSummaryProductsUrl(page), WebsiteName.TcgStore, trackerAction, webhookUrl, queryRequestWebhook);
+
+        try {
+            productTrackerScheduler.scheduleTracker(trackerId, true); // <- trigger rescheduling
+        } catch (TrackingAlreadyScheduledException e) {
+            throw new RuntimeException("Inconsistency, Created Tracker with id " + trackerId + " but it's already defined in the in-memory scheduler");
+        }
+
+        return new TcgProductsTracked()
+                .items(tcgProductsDto)
+                .track(new TrackerInfoDto().trackerId(trackerId));
+    }
+```
+
+### 5\. Update `TrackerAction`
+
+Add a new entry to the `TrackerAction` configuration. This entry should specify:
+
+*   **If the endpoint returns a list**: Indicate whether the endpoint’s response is a list of items.
+*   **DTO Class**: Specify the Data Transfer Object (DTO) class that corresponds to the data returned by the endpoint. This helps the tracking system correctly handle and process the data.
+
+```
+@Getter
+public enum TrackerAction {
+    AMAZON_PRODUCT_DETAILS(false, AmazonProductDto.class),
+    TCGSTORE_SUMMARY_PRODUCTS(true, TcgProductDto.class),
+    TCGSTORE_ALL_SUMMARY_PRODUCTS(true, TcgProductDto.class),
+    STEAM_FIND_PROFILE(false, SteamProfileDto.class),
+    ADD_NEW_ACTION_HERE(...); <- here you can add new cases, the first parameters indicates if the resulting scrape is a list of a single item
+```
+
+### 6\. Implement the Scraping Procedure
+
+Develop the scraping logic to extract data from the endpoint. This procedure should:
+
+*   **Extract the Data**: Implement the logic to scrape or retrieve the data from the specified source.
+*   **Return the Data**: Ensure that the extracted data is formatted and returned to the Service class for further processing.
+
+```
+@Override
+    public List<TcgProductDto> findSummaryAllProducts() throws HttpStatusException, UnsuccessfulScrapeException {
+        String url = getSummaryProductsUrl(1);
+        if(StringUtils.isBlank(url)) {
+            logger.error("Find Summary Products url not found");
+            throw new NullPointerException("Find Summary Products url not found");
+        }
+
+        return executeScrapeAction(TrackerAction.TCGSTORE_ALL_SUMMARY_PRODUCTS, url); // <- call the @ScrapeAction method, used also by the scheduler to run the same action multiple times
+    }
+
+    @ScrapeAction(action = TrackerAction.TCGSTORE_ALL_SUMMARY_PRODUCTS, retryTimes = 1, intervalRetry = 2000) // <- A unique resourse is identified by its TrackerAction and its url. This annotation has also retries and interval retries.
+    protected List<TcgProductDto> findSummaryAllProductsInternal(String url) throws HttpStatusException, UnsuccessfulScrapeException { // <- scrape procedure for the TCGSTORE_ALL_SUMMARY_PRODUCTS TrackerAction
+        int currPage = -1;
+        int nextPage = 1;
+        List<TcgProductDto> tcgProductsDto = new ArrayList<>();
+
+        while(currPage != nextPage) {
+            currPage = nextPage;
+
+            Document page = scraperHttpService.getPage(getSummaryProductsUrl(currPage), websiteSetting);
+            logger.info("Loaded tcg store page: {}", page.location());
+
+            tcgProductsDto.add(getNextItem(page));
+        }
+
+        return tcgProductsDto;
+    }
+```
+
+As you can see it was decided to create a proxy method that internally points to the centralized method for that TrackerAction by using `executeScrapeAction`.
+
+### Summary
+
+By following these steps, you can integrate a new trackable scrappable data type into **DQuery** efficiently. This process involves configuring the API endpoint, defining queryable parameters, implementing controllers and services, and setting up the scraping procedure to handle and process the new data type.
