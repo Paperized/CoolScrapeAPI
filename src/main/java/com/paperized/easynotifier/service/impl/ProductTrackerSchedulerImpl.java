@@ -306,12 +306,9 @@ public class ProductTrackerSchedulerImpl implements ProductTrackerScheduler {
 
         var wsUsers = wsListeningHolderService.getWsUsersListeningToTrackerId(response.getTrackerId());
         for(WebSocketSession wsUser : wsUsers) {
-            try {
-                wsUser.sendMessage(socketMessage);
-            } catch (Exception ex) {
-                // make this better, its just a quick fix
-                wsListeningHolderService.removeWsUserFromTrackerId(wsUser.getPrincipal().getName(), response.getTrackerId());
-            }
+            // Since scheduler and socket close notification might occur in different moments I dont throw here
+            // if the socker is closed but not yet notified we skip ahead, it will be deleted soon after by the configurer
+            AppUtils.sendSocketMessageNoThrow(wsUser, socketMessage);
         }
     }
 

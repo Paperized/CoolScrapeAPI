@@ -11,6 +11,7 @@ import java.util.List;
 public interface WsListeningHolderService {
     void removeTrackerId(String trackerId);
     void addWsUserToTrackerId(WebSocketSession userSession, String trackerId);
-    void removeWsUserFromTrackerId(String user, String trackerId);
+    void removeWsUserFromTrackerId(WebSocketSession userSession, String trackerId);
+    void removeWsUser(WebSocketSession userSession);
     List<WebSocketSession> getWsUsersListeningToTrackerId(String trackerId);
 }

@@ -5,10 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paperized.easynotifier.dto.ws.WebSocketCommand;
 import com.paperized.easynotifier.model.TrackerAction;
 import io.micrometer.common.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 public class AppUtils {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -39,6 +44,14 @@ public class AppUtils {
         }
 
         return new TextMessage(cmd.name() + ";");
+    }
+
+    public static void sendSocketMessageNoThrow(WebSocketSession session, WebSocketMessage<?> message) {
+        try {
+            session.sendMessage(message);
+        } catch (IOException e) {
+            log.warn("Error while sending socket message: " + e.getMessage());
+        }
     }
 
     public static void checkWsOrWebhookMandatory(String webhookUrl, Boolean wsEnabled) {

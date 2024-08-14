@@ -2,17 +2,16 @@ package com.paperized.easynotifier.config.ws;
 
 import com.paperized.easynotifier.controller.ws.WSController;
 import com.paperized.easynotifier.dto.ws.WebSocketCommand;
+import com.paperized.easynotifier.service.WsListeningHolderService;
 import com.paperized.easynotifier.utils.AppUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.Map;
 
 import static com.paperized.easynotifier.dto.ws.WebSocketCommand.StartListening;
@@ -23,10 +22,12 @@ import static org.springframework.web.socket.CloseStatus.SERVER_ERROR;
 public class CustomWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, WebSocketSession> sessions;
     private final WSController controller;
+    private final WsListeningHolderService wsListeningHolderService;
 
-    public CustomWebSocketHandler(Map<String, WebSocketSession> sessions, WSController controller) {
+    public CustomWebSocketHandler(Map<String, WebSocketSession> sessions, WSController controller, WsListeningHolderService wsListeningHolderService) {
         this.sessions = sessions;
         this.controller = controller;
+        this.wsListeningHolderService = wsListeningHolderService;
     }
 
     @Override
@@ -65,6 +66,8 @@ public class CustomWebSocketHandler extends TextWebSocketHandler {
         }
 
         sessions.put(principal.getName(), session);
+        // currently every websocket can do whatever it wants wether anonymous or authenticated
+        // its not needed this part for now
     }
 
     @Override
@@ -76,6 +79,9 @@ public class CustomWebSocketHandler extends TextWebSocketHandler {
         }
 
         sessions.remove(principal.getName());
+
+        // It would have been better to have another object that deliver events, so we dont mixup socket handler with business logic
+        wsListeningHolderService.removeWsUser(session);
     }
 
 
