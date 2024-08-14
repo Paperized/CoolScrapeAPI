@@ -1,9 +1,10 @@
 package com.paperized.easynotifier.service.impl;
 
+import com.paperized.easynotifier.dto.TrackListeningDto;
 import com.paperized.generated.easynotifier.model.SteamProfileDto;
 import com.paperized.generated.easynotifier.model.SteamProfileTracked;
 import com.paperized.generated.easynotifier.model.TrackerInfoDto;
-import com.paperized.easynotifier.model.webhookfilter.DQueryRequestWebhook;
+import com.paperized.easynotifier.model.webhookfilter.DQueryRequestScheduled;
 import com.paperized.easynotifier.exceptions.TrackingAlreadyScheduledException;
 import com.paperized.easynotifier.exceptions.UnsuccessfulScrapeException;
 import com.paperized.easynotifier.model.TrackerAction;
@@ -28,10 +29,9 @@ public class SteamServiceImpl implements SteamService {
     }
 
     @Override
-    public SteamProfileTracked findSteamProfileTracked(String url, String webhookUrl, DQueryRequestWebhook queryRequestWebhook) throws HttpStatusException, UnsuccessfulScrapeException {
+    public SteamProfileTracked findSteamProfileTracked(String url, TrackListeningDto trackListeningDto) throws HttpStatusException, UnsuccessfulScrapeException {
         SteamProfileDto steamProfile = findSteamProfile(url);
-        String trackerId = productTrackerService.trackNewProduct(url, WebsiteName.Steam, TrackerAction.STEAM_FIND_PROFILE, webhookUrl, queryRequestWebhook);
-
+        String trackerId = productTrackerService.trackNewProduct(url, WebsiteName.Steam, TrackerAction.STEAM_FIND_PROFILE, trackListeningDto);
         try {
             productTrackerScheduler.scheduleTracker(trackerId, true);
         } catch (TrackingAlreadyScheduledException e) {

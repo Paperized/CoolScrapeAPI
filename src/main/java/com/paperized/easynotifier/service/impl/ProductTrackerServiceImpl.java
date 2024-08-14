@@ -1,6 +1,7 @@
 package com.paperized.easynotifier.service.impl;
 
-import com.paperized.easynotifier.model.webhookfilter.DQueryRequestWebhook;
+import com.paperized.easynotifier.dto.TrackListeningDto;
+import com.paperized.easynotifier.model.webhookfilter.DQueryRequestScheduled;
 import com.paperized.easynotifier.model.ProductTracker;
 import com.paperized.easynotifier.model.ProductTrackerDetails;
 import com.paperized.easynotifier.model.TrackerAction;
@@ -20,7 +21,7 @@ public class ProductTrackerServiceImpl implements ProductTrackerService {
     }
 
     @Override
-    public String trackNewProduct(String url, WebsiteName websiteName, TrackerAction action, String webhookUrl, DQueryRequestWebhook queryRequestWebhook) {
+    public String trackNewProduct(String url, WebsiteName websiteName, TrackerAction action, TrackListeningDto trackListeningDto) {
         String productTrackerId = UUID.randomUUID().toString();
 
         ProductTracker productTracker = new ProductTracker();
@@ -31,12 +32,18 @@ public class ProductTrackerServiceImpl implements ProductTrackerService {
 
         ProductTrackerDetails productTrackerDetails = new ProductTrackerDetails();
         productTrackerDetails.setId(productTrackerId);
-        productTrackerDetails.setWebhookUrl(webhookUrl);
-        productTrackerDetails.setFilters(queryRequestWebhook);
+        productTrackerDetails.setWebhookUrl(trackListeningDto.getWebhookUrl());
+        productTrackerDetails.setWsEnabled(trackListeningDto.isWsEnabled());
+        productTrackerDetails.setFilters(trackListeningDto.getDQueryRequestScheduled());
         productTrackerDetails.setIntervalDuration(1000);
         productTracker.setProductTrackerDetails(productTrackerDetails);
 
         productTrackerRepository.save(productTracker);
         return productTrackerId;
+    }
+
+    @Override
+    public boolean existsTrackerIdWithWS(String trackerId) {
+        return productTrackerRepository.existsTrackerIdWithWsEnabled(trackerId);
     }
 }

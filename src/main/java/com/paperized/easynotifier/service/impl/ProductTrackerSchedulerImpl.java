@@ -1,8 +1,10 @@
 package com.paperized.easynotifier.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.paperized.easynotifier.config.ws.CustomWebSocketConfigurer;
 import com.paperized.easynotifier.dquery.DQueriable;
-import com.paperized.easynotifier.dto.WebhookScrapeInput;
+import com.paperized.easynotifier.dto.TrackerPeriodicResponse;
+import com.paperized.easynotifier.dto.ws.WebSocketCommand;
 import com.paperized.easynotifier.exceptions.NoDataException;
 import com.paperized.easynotifier.exceptions.TrackingAlreadyScheduledException;
 import com.paperized.easynotifier.exceptions.TrackingExpiredException;
@@ -16,10 +18,12 @@ import com.paperized.easynotifier.repository.ProductTrackerRepository;
 import com.paperized.easynotifier.repository.ProductTrackerDetailsRepository;
 import com.paperized.easynotifier.service.ProductTrackerScheduler;
 import com.paperized.easynotifier.service.ScrapingActionService;
+import com.paperized.easynotifier.service.WsListeningHolderService;
 import com.paperized.easynotifier.utils.AppUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.HttpStatusException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
@@ -27,7 +31,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
@@ -46,15 +53,19 @@ public class ProductTrackerSchedulerImpl implements ProductTrackerScheduler {
     private final ProductTrackerDetailsRepository productTrackerDetailsRepository;
     private final TaskScheduler taskScheduler;
     private final Long defaultRegisteredExpireInMinutes;
+    private final Map<String, WebSocketSession> wsSessions;
+    private final WsListeningHolderService wsListeningHolderService;
 
     public ProductTrackerSchedulerImpl(@Value("${tracking.defaultRegistrationExpireTime}") Long defaultRegisteredExpireInMinutes, ScrapingActionService scrapingActionService,
                                        ProductTrackerRepository productTrackerRepository, ProductTrackerDetailsRepository productTrackerDetailsRepository,
-                                       TaskScheduler taskScheduler) {
+                                       TaskScheduler taskScheduler, CustomWebSocketConfigurer customWebSocketConfigurer, Map<String, WebSocketSession> wsSessions, WsListeningHolderService wsListeningHolderService) {
         this.scrapingActionService = scrapingActionService;
         this.productTrackerRepository = productTrackerRepository;
         this.defaultRegisteredExpireInMinutes = defaultRegisteredExpireInMinutes;
         this.productTrackerDetailsRepository = productTrackerDetailsRepository;
         this.taskScheduler = taskScheduler;
+        this.wsSessions = wsSessions;
+        this.wsListeningHolderService = wsListeningHolderService;
     }
 
     @PostConstruct
@@ -174,17 +185,29 @@ public class ProductTrackerSchedulerImpl implements ProductTrackerScheduler {
                 Object dataToSave = DOnChangeSaveMode.SAVE_ALL.equals(saveMode) ? allData : dataChanged;
                 if (dataToSave != null) {
                     registeredTracking.setLastScrapedDataJson(AppUtils.toJson(dataToSave));
-                    productTrackerDetailsRepository.save(registeredTracking);
+                    //productTrackerDetailsRepository.save(registeredTracking);
 
                     String resultTest = AppUtils.toJson(scrapedResult);
                     log.info(resultTest);
                 }
 
                 Object dataToSend = DOnChangeMode.SEND_ALL_ONLY_IF_DIFF.equals(sendMode) ? allData : dataChanged;
-                makeWebhookRequest(trackerId, registeredTracking.getWebhookUrl(), dataToSend);
+
+                TrackerPeriodicResponse response = new TrackerPeriodicResponse();
+                response.setTrackerId(trackerId);
+                response.setAction(tracking.getAction().name());
+                response.setData(dataToSend);
+
+                if(registeredTracking.isWsEnabled()) {
+                    notifyWsUsers(response);
+                }
+
+                if(StringUtils.isNotBlank(registeredTracking.getWebhookUrl())) {
+                    //makeWebhookRequest(trackerId, response);
+                }
             } catch (HttpStatusException | UnsuccessfulScrapeException e) {
                 log.error(e.getMessage());
-            } catch (JsonProcessingException e) {
+            } catch (IOException e) {
                 log.error("Logging test result failed: {}", e.getMessage());
             }
         };
@@ -266,15 +289,29 @@ public class ProductTrackerSchedulerImpl implements ProductTrackerScheduler {
         return new ChangedData(hasChanged, changes, allData);
     }
 
-    private void makeWebhookRequest(String trackerId, String webhook, Object body) {
+    private void makeWebhookRequest(String webhook, TrackerPeriodicResponse response) {
         RestTemplate restTemplate = new RestTemplate();
         try {
-            restTemplate.postForLocation(URI.create(webhook), WebhookScrapeInput.builder().result(body).trackingId(trackerId).build());
-            log.info("Successfully scraped product with tracking id: {} and sent via webhook", trackerId);
+            restTemplate.postForLocation(URI.create(webhook), response);
+            log.info("Successfully scraped product with tracking id: {} and sent via webhook", response.getTrackerId());
         } catch (RestClientException ex) {
             // implement max retries before deleting the schedule
             log.info("Failed to send scraped result via webhook (trackingId: {}, webhookUrl: {}, message: {})",
-                    trackerId, webhook, ex.getMessage());
+                    response.getTrackerId(), webhook, ex.getMessage());
+        }
+    }
+
+    private void notifyWsUsers(TrackerPeriodicResponse response) throws IOException {
+        TextMessage socketMessage = AppUtils.toSocketMessage(WebSocketCommand.Listen, response);
+
+        var wsUsers = wsListeningHolderService.getWsUsersListeningToTrackerId(response.getTrackerId());
+        for(WebSocketSession wsUser : wsUsers) {
+            try {
+                wsUser.sendMessage(socketMessage);
+            } catch (Exception ex) {
+                // make this better, its just a quick fix
+                wsListeningHolderService.removeWsUserFromTrackerId(wsUser.getPrincipal().getName(), response.getTrackerId());
+            }
         }
     }
 

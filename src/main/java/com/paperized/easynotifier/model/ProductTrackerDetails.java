@@ -1,7 +1,7 @@
 package com.paperized.easynotifier.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.paperized.easynotifier.model.webhookfilter.DQueryRequestWebhook;
+import com.paperized.easynotifier.model.webhookfilter.DQueryRequestScheduled;
 import com.paperized.easynotifier.model.converter.DQueryRequestConverter;
 import com.paperized.easynotifier.utils.AppUtils;
 import jakarta.persistence.*;
@@ -19,12 +19,15 @@ public class ProductTrackerDetails {
     @Column(name = "WEBHOOK_URL", nullable = false)
     private String webhookUrl;
 
+    @Column(name = "WS_ENABLED", nullable = false)
+    private boolean wsEnabled;
+
     @Column(name = "INTERVAL_DURATION", nullable = false)
     private long intervalDuration;
 
     @Column(name = "REQUEST_QUERY", nullable = true)
     @Convert(converter = DQueryRequestConverter.class)
-    private DQueryRequestWebhook filters;
+    private DQueryRequestScheduled filters;
 
     @Column(name = "LAST_DATA", nullable = true)
     private String lastScrapedDataJson;

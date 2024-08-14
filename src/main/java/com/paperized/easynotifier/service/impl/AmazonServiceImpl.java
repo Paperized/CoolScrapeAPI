@@ -1,9 +1,10 @@
 package com.paperized.easynotifier.service.impl;
 
+import com.paperized.easynotifier.dto.TrackListeningDto;
 import com.paperized.generated.easynotifier.model.AmazonProductDto;
 import com.paperized.generated.easynotifier.model.AmazonProductTracked;
 import com.paperized.generated.easynotifier.model.TrackerInfoDto;
-import com.paperized.easynotifier.model.webhookfilter.DQueryRequestWebhook;
+import com.paperized.easynotifier.model.webhookfilter.DQueryRequestScheduled;
 import com.paperized.easynotifier.exceptions.TrackingAlreadyScheduledException;
 import com.paperized.easynotifier.exceptions.UnsuccessfulScrapeException;
 import com.paperized.easynotifier.model.TrackerAction;
@@ -28,9 +29,9 @@ public class AmazonServiceImpl implements AmazonService {
     }
 
     @Override
-    public AmazonProductTracked findProductDetailsTracked(String url, String webhookUrl, DQueryRequestWebhook queryRequestWebhook) throws HttpStatusException, UnsuccessfulScrapeException {
+    public AmazonProductTracked findProductDetailsTracked(String url, TrackListeningDto trackListeningDto) throws HttpStatusException, UnsuccessfulScrapeException {
         AmazonProductDto amazonProduct = findProductDetails(url);
-        String trackerId = productTrackerService.trackNewProduct(url, WebsiteName.Amazon, TrackerAction.AMAZON_PRODUCT_DETAILS, webhookUrl, queryRequestWebhook);
+        String trackerId = productTrackerService.trackNewProduct(url, WebsiteName.Amazon, TrackerAction.AMAZON_PRODUCT_DETAILS, trackListeningDto);
 
         try {
             productTrackerScheduler.scheduleTracker(trackerId, true);

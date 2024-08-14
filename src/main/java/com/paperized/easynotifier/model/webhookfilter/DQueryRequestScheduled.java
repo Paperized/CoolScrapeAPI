@@ -10,10 +10,10 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Data
-public class DQueryRequestWebhook extends DQueryRequest implements Serializable {
+public class DQueryRequestScheduled extends DQueryRequest implements Serializable {
     private DOnChanges previousDataChecks;
 
-    public DQueryRequestWebhook(DQueryRequest queryRequest) {
+    public DQueryRequestScheduled(DQueryRequest queryRequest) {
         setQuery(queryRequest.getQuery());
         setSort(queryRequest.getSort());
         setPick(queryRequest.getPick());

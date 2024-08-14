@@ -36,6 +36,7 @@ paths:
       operationId: findSummaryProductsTrack
       parameters:
         - $ref: '#/components/parameters/WebhookUrl'
+        - $ref: '#/components/parameters/WsEnabled'
         - $ref: '#/components/parameters/CheckMode'
         - $ref: '#/components/parameters/SaveMode'
         - $ref: '#/components/parameters/PropertiesToCheck'
@@ -91,6 +92,7 @@ paths:
           schema:
             type: string
         - $ref: '#/components/parameters/WebhookUrl'
+        - $ref: '#/components/parameters/WsEnabled'
         - $ref: '#/components/parameters/CheckMode'
         - $ref: '#/components/parameters/SaveMode'
         - $ref: '#/components/parameters/PropertiesToCheck'
@@ -141,6 +143,7 @@ paths:
           schema:
             type: string
         - $ref: '#/components/parameters/WebhookUrl'
+        - $ref: '#/components/parameters/WsEnabled'
         - $ref: '#/components/parameters/CheckMode'
         - $ref: '#/components/parameters/SaveMode'
         - $ref: '#/components/parameters/PropertiesToCheck'
@@ -263,10 +266,16 @@ components:
   parameters:
     WebhookUrl:
       in: query
-      required: true
+      required: false
       name: webhookUrl
       schema:
         type: string
+    WsEnabled:
+      in: query
+      required: false
+      name: wsEnabled
+      schema:
+        type: boolean
     CheckMode:
       in: query
       required: false

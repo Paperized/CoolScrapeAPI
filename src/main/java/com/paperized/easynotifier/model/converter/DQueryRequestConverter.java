@@ -2,7 +2,7 @@ package com.paperized.easynotifier.model.converter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.paperized.easynotifier.model.webhookfilter.DQueryRequestWebhook;
+import com.paperized.easynotifier.model.webhookfilter.DQueryRequestScheduled;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import lombok.extern.slf4j.Slf4j;
@@ -11,11 +11,11 @@ import java.io.IOException;
 
 @Slf4j
 @Converter
-public class DQueryRequestConverter implements AttributeConverter<DQueryRequestWebhook, String> {
+public class DQueryRequestConverter implements AttributeConverter<DQueryRequestScheduled, String> {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Override
-    public String convertToDatabaseColumn(DQueryRequestWebhook attribute) {
+    public String convertToDatabaseColumn(DQueryRequestScheduled attribute) {
         if (attribute == null) {
             return null;
         }
@@ -30,12 +30,12 @@ public class DQueryRequestConverter implements AttributeConverter<DQueryRequestW
     }
 
     @Override
-    public DQueryRequestWebhook convertToEntityAttribute(String dQueryRequest) {
+    public DQueryRequestScheduled convertToEntityAttribute(String dQueryRequest) {
         try {
             if(dQueryRequest == null)
                 return null;
 
-            return MAPPER.readValue(dQueryRequest, DQueryRequestWebhook.class);
+            return MAPPER.readValue(dQueryRequest, DQueryRequestScheduled.class);
         }
         catch (JsonProcessingException e) {
             log.error("Convert error while trying to convert string(JSON) to map data structure.");

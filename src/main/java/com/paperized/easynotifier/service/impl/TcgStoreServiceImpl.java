@@ -1,10 +1,11 @@
 package com.paperized.easynotifier.service.impl;
 
+import com.paperized.easynotifier.dto.TrackListeningDto;
 import com.paperized.generated.easynotifier.model.TcgProductDto;
 import com.paperized.generated.easynotifier.model.TcgProductsTracked;
 import com.paperized.generated.easynotifier.model.TrackerInfoDto;
 import com.paperized.easynotifier.dquery.DQueryRequest;
-import com.paperized.easynotifier.model.webhookfilter.DQueryRequestWebhook;
+import com.paperized.easynotifier.model.webhookfilter.DQueryRequestScheduled;
 import com.paperized.easynotifier.exceptions.TrackingAlreadyScheduledException;
 import com.paperized.easynotifier.exceptions.UnsuccessfulScrapeException;
 import com.paperized.easynotifier.model.TrackerAction;
@@ -31,10 +32,10 @@ public class TcgStoreServiceImpl implements TcgStoreService {
     }
 
     @Override
-    public TcgProductsTracked findSummaryProductsTracked(Integer page, String webhookUrl, DQueryRequestWebhook queryRequestWebhook) throws HttpStatusException, UnsuccessfulScrapeException {
-        List<TcgProductDto> tcgProductsDto = findSummaryProducts(page, queryRequestWebhook);
+    public TcgProductsTracked findSummaryProductsTracked(Integer page, TrackListeningDto trackListeningDto) throws HttpStatusException, UnsuccessfulScrapeException {
+        List<TcgProductDto> tcgProductsDto = findSummaryProducts(page, trackListeningDto.getDQueryRequestScheduled());
         TrackerAction trackerAction = page != null ? TrackerAction.TCGSTORE_SUMMARY_PRODUCTS : TrackerAction.TCGSTORE_ALL_SUMMARY_PRODUCTS;
-        String trackerId = productTrackerService.trackNewProduct(tcgStoreScraper.getSummaryProductsUrl(page), WebsiteName.TcgStore, trackerAction, webhookUrl, queryRequestWebhook);
+        String trackerId = productTrackerService.trackNewProduct(tcgStoreScraper.getSummaryProductsUrl(page), WebsiteName.TcgStore, trackerAction, trackListeningDto);
 
         try {
             productTrackerScheduler.scheduleTracker(trackerId, true);
