@@ -2,6 +2,7 @@ package com.paperized.easynotifier.service.impl;
 
 import com.paperized.easynotifier.dto.TrackListeningDto;
 import com.paperized.easynotifier.exceptions.TrackingAlreadyScheduledException;
+import com.paperized.easynotifier.exceptions.UnsuccessfulScrapeException;
 import com.paperized.easynotifier.model.TrackerAction;
 import com.paperized.easynotifier.model.WebsiteName;
 import com.paperized.easynotifier.scraper.LinkedinScraper;
@@ -9,6 +10,7 @@ import com.paperized.easynotifier.service.LinkedinService;
 import com.paperized.easynotifier.service.ProductTrackerScheduler;
 import com.paperized.easynotifier.service.ProductTrackerService;
 import com.paperized.generated.easynotifier.model.*;
+import org.jsoup.HttpStatusException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,12 +28,12 @@ public class LinkedinServiceImpl implements LinkedinService {
     }
 
     @Override
-    public List<LinkedinCandidateDto> findCandidates(FindCandidatesRequest findCandidatesRequest) {
+    public List<LinkedinCandidateDto> findCandidates(FindCandidatesRequest findCandidatesRequest) throws HttpStatusException, UnsuccessfulScrapeException {
         return linkedinScraper.findCandidates(findCandidatesRequest.getUrl());
     }
 
     @Override
-    public LinkedinCandidatesTracked findCandidatesTracked(FindCandidatesRequest findCandidatesRequest, TrackListeningDto trackListeningDto) {
+    public LinkedinCandidatesTracked findCandidatesTracked(FindCandidatesRequest findCandidatesRequest, TrackListeningDto trackListeningDto) throws HttpStatusException, UnsuccessfulScrapeException {
         List<LinkedinCandidateDto> firstResult = findCandidates(findCandidatesRequest);
         String trackerId = productTrackerService.trackNewProduct(findCandidatesRequest.getUrl(),
                 WebsiteName.Linkedin, TrackerAction.LINKEDIN_FIND_CANDIDATES, trackListeningDto);
