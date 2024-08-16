@@ -1,24 +1,24 @@
-# DataNotifier
-**DataNotifier** is a backend software designed to scrape supported web pages, retrieve data, and deliver it through various channels, including webhooks, sockets, or plain HTTP GET calls. [how to add new scrape procedures](#how-to)
+# EasyNotifier
+**EasyNotifier** is a backend software designed to scrape supported web pages, retrieve data, and deliver it through various channels, including webhooks, sockets, or plain HTTP GET calls. [how to add new scrape procedures](#how-to)
 
 ## Key Features
-- Scheduled Data Monitoring: The core functionality of DataNotifier revolves around a Scheduler that monitors specific data on web pages using a **trackingId**. This ID replicates the initial call, enabling the detection of any changes in the response. When a change is detected, DataNotifier promptly notifies the caller.
+- Scheduled Data Monitoring: The core functionality of EasyNotifier revolves around a Scheduler that monitors specific data on web pages using a **trackingId**. This ID replicates the initial call, enabling the detection of any changes in the response. When a change is detected, EasyNotifier promptly notifies the caller.
 
 - Customizable Data Filtering: Clients can define resources to scrape and apply additional filters to refine the extracted data. Supported predicates include greater than, less than, equals, AND, OR, and more. Additionally, the service allows sorting by fields and limiting the number of returned elements.
 
-- Versatile Data Delivery: DataNotifier is highly adaptable, capable of sending data via webhooks, sockets, or through simple HTTP GET calls, making it easy to integrate with other systems.
+- Versatile Data Delivery: EasyNotifier is highly adaptable, capable of sending data via webhooks, sockets, or through simple HTTP GET calls, making it easy to integrate with other systems.
 
 ## Intended Use
-Originally envisioned as a core service for other backend applications, DataNotifier acts as a centralized tool for scraping, monitoring, and detecting changes in data. It’s ideal for scenarios where real-time updates are crucial, with notifications delivered directly via webhooks or sockets. For more straightforward use cases, it also supports single HTTP GET requests to return scraped data without the need for ongoing monitoring.
+Originally envisioned as a core service for other backend applications, EasyNotifier acts as a centralized tool for scraping, monitoring, and detecting changes in data. It’s ideal for scenarios where real-time updates are crucial, with notifications delivered directly via webhooks or sockets. For more straightforward use cases, it also supports single HTTP GET requests to return scraped data without the need for ongoing monitoring.
 
 ## Currently method supported
 - [x] Webhook
+- [x] Sockets
 - [x] HTTP Get
-- [ ] Sockets -> useful for pages with high refresh rate on data, not a priority for now
 
 ## OpenAPI Generator Usage:
 
-**DataNotifier** utilizes the OpenAPI Generator for several key reasons, enhancing both development efficiency and code maintainability.
+**EasyNotifier** utilizes the OpenAPI Generator for several key reasons, enhancing both development efficiency and code maintainability.
 
 ### Reasons for Choosing OpenAPI Generator
 
@@ -36,7 +36,7 @@ Originally envisioned as a core service for other backend applications, DataNoti
 *   ![image](https://github.com/user-attachments/assets/13a63a34-963b-4393-99ac-ab39063b1e9e)
 
 
-By leveraging OpenAPI Generator, **DataNotifier** achieves a robust, maintainable architecture while streamlining the development process through automated code generation and customizable extensions.
+By leveraging OpenAPI Generator, **EasyNotifier** achieves a robust, maintainable architecture while streamlining the development process through automated code generation and customizable extensions.
 
 ## DQuery: Dynamic Query Filter System:
 I did not want to make one filter for each type of data extracted, and for each of them create a new type of filter method using an operation type to switch the type of filter, so I came up with a generic solution that could be used in any Java application, the only needed step is to make the Dtos extends from DQueriables, by using OpenAPI with the custom Mustache this step is also omitted and it's 100% automatic.
