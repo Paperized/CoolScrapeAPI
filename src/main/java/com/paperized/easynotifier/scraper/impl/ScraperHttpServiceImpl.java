@@ -3,6 +3,7 @@ package com.paperized.easynotifier.scraper.impl;
 import com.paperized.easynotifier.dto.WebsiteSetting;
 import com.paperized.easynotifier.exceptions.ScraperFailedConnectionException;
 import com.paperized.easynotifier.scraper.ScraperHttpService;
+import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -20,10 +21,26 @@ public class ScraperHttpServiceImpl implements ScraperHttpService {
     // manages proxy
 
     @Override
-    public Document getPage(String url) throws ScraperFailedConnectionException {
+    public Connection.Response getAnyContentPage(String url) throws ScraperFailedConnectionException, HttpStatusException {
+        try {
+            return Jsoup
+                    .connect(url)
+                    .ignoreContentType(true)
+                    .execute();
+        } catch (HttpStatusException e) {
+            throw e;
+        }catch (IOException e) {
+            throw new ScraperFailedConnectionException("Error while downloading page", e);
+        }
+    }
+
+    @Override
+    public Document getPage(String url) throws ScraperFailedConnectionException, HttpStatusException {
         try {
             return Jsoup.connect(url).get();
-        } catch (IOException e) {
+        } catch (HttpStatusException e) {
+            throw e;
+        }catch (IOException e) {
             throw new ScraperFailedConnectionException("Error while downloading page", e);
         }
     }

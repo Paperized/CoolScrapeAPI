@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum WebsiteName {
+    Linkedin("linkedin"),
     Amazon("amazon"),
     TcgStore("tcg-store"),
     Steam("steam");

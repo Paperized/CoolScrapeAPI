@@ -6,6 +6,37 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
+  /linkedin/find-candidates:
+    post:
+      tags:
+        - linkedin
+      operationId: findCandidates
+      parameters:
+        - $ref: '#/components/parameters/WebhookUrl'
+        - $ref: '#/components/parameters/WsEnabled'
+        - $ref: '#/components/parameters/CheckMode'
+        - $ref: '#/components/parameters/SaveMode'
+        - $ref: '#/components/parameters/PropertiesToCheck'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pageSize:
+                  type: integer
+                url:
+                  type: string
+                query:
+                  type: dquery
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkedinCandidatesTracked'
+
   /tcg-store/find-summary-products:
     post:
       tags:
@@ -174,6 +205,15 @@ paths:
 
 components:
   schemas:
+    LinkedinCandidatesTracked:
+      type: object
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/LinkedinCandidateDto'
+        track:
+          $ref: '#/components/schemas/TrackerInfoDto'
+
     TcgProductsTracked:
       type: object
       properties:
@@ -210,6 +250,30 @@ components:
           type: boolean
         playingAt:
           type: string
+
+    LinkedinCandidateDto:
+      type: object
+      x-dqueriable:
+        id-composition: [ id ]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        profileImg:
+          type: string
+        profileUrl:
+          type: string
+        memberDistance:
+          type: string
+        subtitle:
+          type: string
+        currentOccupation:
+          type: string
+        city:
+          type: string
+        mutualConnections:
+          type: integer
 
     TcgProductDto:
       type: object

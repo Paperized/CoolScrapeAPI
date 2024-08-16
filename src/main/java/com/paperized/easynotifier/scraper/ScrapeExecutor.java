@@ -1,11 +1,14 @@
 package com.paperized.easynotifier.scraper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.paperized.easynotifier.config.ScraperSettings;
 import com.paperized.easynotifier.dto.WebsiteSetting;
 import com.paperized.easynotifier.exceptions.UnsuccessfulScrapeException;
 import com.paperized.easynotifier.model.TrackerAction;
 import com.paperized.easynotifier.model.WebsiteName;
 import com.paperized.easynotifier.scraper.annotations.ScrapeAction;
+import com.paperized.easynotifier.utils.AppUtils;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.HttpStatusException;
@@ -106,13 +109,13 @@ public abstract class ScrapeExecutor {
                             Throwable target = e.getTargetException();
                             if (target instanceof HttpStatusException || target instanceof UnsuccessfulScrapeException)
                                 throw (Exception) target;
-                            throw e;
+                            throw new UnsuccessfulScrapeException(e);
                         }
                     });
                 } catch (HttpStatusException | UnsuccessfulScrapeException e) {
                     throw e;
                 } catch (Exception e) {
-                    throw new RuntimeException(format("%s.%s: %s", className, method.getName(), e.getMessage()), e);
+                    throw new UnsuccessfulScrapeException(format("%s.%s: %s", className, method.getName(), e.getMessage()), e);
                 }
             };
         } else {
@@ -126,13 +129,22 @@ public abstract class ScrapeExecutor {
                     if (target instanceof UnsuccessfulScrapeException innerEx)
                         throw innerEx;
 
-                    throw new RuntimeException(format("%s.%s: %s", className, method.getName(), e.getMessage()), e);
+                    throw new UnsuccessfulScrapeException(format("%s.%s: %s", className, method.getName(), e.getMessage()), e);
                 } catch (Throwable e) {
-                    throw new RuntimeException(format("%s.%s: %s", className, method.getName(), e.getMessage()), e);
+                    throw new UnsuccessfulScrapeException(format("%s.%s: %s", className, method.getName(), e.getMessage()), e);
                 }
             };
         }
         return scrapeFunction;
+    }
+
+    protected JsonNode convertResponseToJson(String text) throws UnsuccessfulScrapeException {
+        try {
+            return AppUtils.fromJson(text);
+        } catch (JsonProcessingException e) {
+            logger.info("Scraper could not convert the given text to JsonNode! {}", e.getMessage());
+            throw new UnsuccessfulScrapeException("Couldn't convert text to JSON Node", e);
+        }
     }
 
     @FunctionalInterface

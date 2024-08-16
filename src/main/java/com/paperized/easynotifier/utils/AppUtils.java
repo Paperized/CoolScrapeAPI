@@ -1,6 +1,7 @@
 package com.paperized.easynotifier.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paperized.easynotifier.dto.ws.WebSocketCommand;
 import com.paperized.easynotifier.model.TrackerAction;
@@ -23,6 +24,10 @@ public class AppUtils {
         }
 
         return MAPPER.readValue(json, trackerAction.getClazz());
+    }
+
+    public static JsonNode fromJson(String json) throws JsonProcessingException {
+        return MAPPER.readTree(json);
     }
 
     public static <T> T fromJson(String json, Class<T> clazz) throws JsonProcessingException {
@@ -58,5 +63,9 @@ public class AppUtils {
         if(StringUtils.isBlank(webhookUrl) && !Boolean.TRUE.equals(wsEnabled)) {
             throw new RuntimeException("WebhookUrl or WsEnabled are mandatory to start tracking!");
         }
+    }
+
+    public static boolean hasWsOrWebhook(String webhookUrl, Boolean wsEnabled) {
+        return StringUtils.isNotBlank(webhookUrl) || Boolean.TRUE.equals(wsEnabled);
     }
 }

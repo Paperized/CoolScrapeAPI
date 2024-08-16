@@ -1,5 +1,12 @@
 scraper-settings:
     websitesSettings:
+        linkedin:
+            baseUrl: https://www.linkedin.com/
+            availableHeaders:
+                - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
+            extraHeaders: [ ]
+            customProperties: []
+
         amazon:
             baseUrl: https://www.amazon.it
             availableHeaders:

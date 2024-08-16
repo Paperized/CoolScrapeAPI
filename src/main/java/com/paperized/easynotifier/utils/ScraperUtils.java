@@ -1,6 +1,12 @@
 package com.paperized.easynotifier.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.paperized.easynotifier.exceptions.UnsuccessfulScrapeException;
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
@@ -8,9 +14,11 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.jsoup.nodes.Element;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Slf4j
 public final class ScraperUtils {
-    private ScraperUtils() {}
 
     public static String getText(Element element) {
         if(element == null) {
@@ -46,5 +54,39 @@ public final class ScraperUtils {
             return new ImmutableTriple<>(null, null, null);
         }
         return new ImmutableTriple<>(extractor1.apply(el), extractor2.apply(el), extractor3.apply(el));
+    }
+
+    public static <T> T getData(Supplier<T> supplier) {
+        return getData(supplier, null);
+    }
+
+    public static <T> T getData(Supplier<T> supplier, String logNotFound) {
+        try {
+            return supplier.get();
+        } catch (Exception ex) {
+            if(StringUtils.isNotBlank(logNotFound)) {
+                log.info(logNotFound);
+            }
+
+            return null;
+        }
+    }
+
+    public static <T extends JsonNode> T getNode(Supplier<T> supplier, String logNotFound) {
+        try {
+            return supplier.get();
+        } catch (Exception ex) {
+            log.info(logNotFound);
+            return null;
+        }
+    }
+
+    public static <T extends JsonNode> T getNodeAndThrow(Supplier<T> supplier, String logNotFound) throws UnsuccessfulScrapeException {
+        try {
+            return supplier.get();
+        } catch (Exception ex) {
+            log.info(logNotFound);
+            throw new UnsuccessfulScrapeException(logNotFound, ex);
+        }
     }
 }
